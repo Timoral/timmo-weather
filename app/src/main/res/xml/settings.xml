@@ -1,0 +1,20 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory android:title="@string/pref_header_general">
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="dark_theme"
+            android:summaryOff="@string/pref_summary_off_dark_theme"
+            android:summaryOn="@string/pref_summary_off_dark_theme"
+            android:title="@string/pref_title_dark_theme" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="@string/pref_header_overview">
+        <ListPreference
+            android:entries="@array/hour_forecast_hours"
+            android:entryValues="@array/hour_forecast_hours_values"
+            android:key="hour_forecast_hours"
+            android:defaultValue="1"
+            android:summary="@string/pref_summary_hour_forecast_hours"
+            android:title="@string/pref_title_hour_forecast_hours" />
+    </PreferenceCategory>
+
+</PreferenceScreen>

@@ -1,0 +1,37 @@
+<resources>
+    <string name="app_name">Timmo Weather</string>
+    <string name="action_settings">Settings</string>
+    <string name="action_rate">Rate</string>
+    <string name="action_more">More Apps</string>
+    <string name="drawer_open">Open navigation drawer</string>
+    <string name="drawer_close">Close navigation drawer</string>
+
+    <string name="name_city">City</string>
+    <string name="name_updated">Last Updated: </string>
+    <string name="name_condition">CONDITIONS</string>
+    <string name="name_temperature">Temperature: </string>
+    <string name="name_humidity">Humidity: </string>
+    <string name="name_pressure">Pressure: </string>
+    <string name="name_hr">Hour</string>
+
+    <string name="desc_icon_weather">Weather Icon</string>
+    <string name="desc_location">Location</string>
+    <string name="desc_refresh">Refresh</string>
+
+    <string name="change_city">Change city</string>
+    <string name="open_weather_maps_app_id">efb7b9888b0708746bd71d6251ef709c</string>
+
+    <string name="weather_sunny">&#xf00d;</string>
+    <string name="weather_clear_night">&#xf02e;</string>
+
+    <string name="weather_foggy">&#xf014;</string>
+    <string name="weather_cloudy">&#xf013;</string>
+    <string name="weather_rainy">&#xf019;</string>
+    <string name="weather_snowy">&#xf01b;</string>
+    <string name="weather_thunder">&#xf01e;</string>
+    <string name="weather_drizzle">&#xf01c;</string>
+
+    <string name="place_not_found">Sorry, no weather data found.</string>
+    <string name="no_location_detected">Could\'nt find location.</string>
+
+</resources>

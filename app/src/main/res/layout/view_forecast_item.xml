@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_margin="5dp"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/textViewHrHr"
+        style="@style/textAppearanceSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/name_hr" />
+
+    <TextView
+        android:id="@+id/textViewHrIcon"
+        style="@style/textAppearanceLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:text="@string/weather_cloudy"
+        android:textSize="60sp" />
+
+    <TextView
+        android:id="@+id/textViewHrCondition"
+        style="@style/textAppearanceSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/name_condition"
+        android:layout_gravity="center_horizontal" />
+
+    <TextView
+        android:id="@+id/textViewHrTemp"
+        style="@style/textAppearanceSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/name_temperature"
+        android:layout_gravity="center_horizontal" />
+
+
+</LinearLayout>
