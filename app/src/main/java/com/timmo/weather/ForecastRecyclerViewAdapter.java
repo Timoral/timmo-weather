@@ -3,7 +3,6 @@ package com.timmo.weather;
 import android.content.Context;
 import android.graphics.Typeface;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,7 +13,10 @@ import java.util.ArrayList;
 public class ForecastRecyclerViewAdapter extends RecyclerView.Adapter<ForecastRecyclerViewAdapter.ViewHolder> {
 
     private static Context mContext;
-    private ArrayList<String> arrayListHr, arrayListIcon, arrayListCondition, arrayListTemp;
+    private final ArrayList<String> arrayListHr;
+    private final ArrayList<String> arrayListIcon;
+    private final ArrayList<String> arrayListCondition;
+    private final ArrayList<String> arrayListTemp;
 
     public ForecastRecyclerViewAdapter(Context context, ArrayList<String> hr, ArrayList<String> icon,
                                        ArrayList<String> condition, ArrayList<String> temp) {

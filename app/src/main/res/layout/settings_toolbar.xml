@@ -11,4 +11,4 @@
     app:navigationIcon="?attr/homeAsUpIndicator"
     app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
     app:title="@string/action_settings"
-    tools:ignore="PrivateResource" />
+    tools:ignore="Overdraw,PrivateResource" />

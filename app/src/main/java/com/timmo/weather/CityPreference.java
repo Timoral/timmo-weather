@@ -3,9 +3,9 @@ package com.timmo.weather;
 import android.app.Activity;
 import android.content.SharedPreferences;
 
-public class CityPreference {
+class CityPreference {
 
-    SharedPreferences prefs;
+    private final SharedPreferences prefs;
 
     public CityPreference(Activity activity) {
         prefs = activity.getPreferences(Activity.MODE_PRIVATE);

@@ -18,22 +18,21 @@ import android.widget.ListView;
 
 public class SettingsActivity extends PreferenceActivity {
 
-    private SharedPreferences sharedPreferences;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
         if (sharedPreferences.getBoolean("dark_theme", false)) {
             setTheme(R.style.AppThemeDark);
         } else {
             setTheme(R.style.AppTheme);
         }
         super.onCreate(savedInstanceState);
+        //noinspection deprecation
         addPreferencesFromResource(R.xml.settings);
 
 
-        Preference preferenceTheme = findPreference("dark_theme");
+        @SuppressWarnings("deprecation") Preference preferenceTheme = findPreference("dark_theme");
         preferenceTheme.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {

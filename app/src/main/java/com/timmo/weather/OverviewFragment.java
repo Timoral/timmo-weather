@@ -2,6 +2,7 @@ package com.timmo.weather;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.graphics.Typeface;
 import android.location.Address;
 import android.location.Geocoder;
@@ -31,31 +32,28 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-
 public class OverviewFragment extends android.support.v4.app.Fragment implements View.OnClickListener {
 
 
     // region Global Vars
     public static final String ARG_OVERVIEW = "OVERVIEW";
-    private SharedPreferences sharedPreferences;
-    private Handler handler;
+    private final Handler handler;
     private Typeface weatherFont;
-    private String location, cityName;
     private LocationManager locationManager;
     private LocationListener locationListener;
     private TextView textViewCurrCity, textViewUpdated, textViewCurrIcon, textViewCurrCondition,
             textViewCurrTemp, textViewCurrHumidity, textViewCurrPressure;
-    private ImageButton imageButtonRefresh, imageButtonLocation;
     private ProgressBar progressBar;
-    private RecyclerView recyclerViewForecast;
-    private RecyclerView.Adapter recyclerViewAdapter;
-
     private ArrayList<String> arrayListHr, arrayListIcon, arrayListCondition, arrayListTemp;
+    private int max;
+    private DateFormat dfTime;
+    private RecyclerView.Adapter recyclerViewAdapter;
+    private SharedPreferences sharedPreferences;
+    //endregion
 
     public OverviewFragment() {
         handler = new Handler();
     }
-    //endregion
 
     // region onCreateView
     @Override
@@ -67,7 +65,6 @@ public class OverviewFragment extends android.support.v4.app.Fragment implements
         getActivity().setTitle(notes);
         return rootView;
     }
-    //endregion
 
     //region onViewCreated
     @Override
@@ -82,15 +79,17 @@ public class OverviewFragment extends android.support.v4.app.Fragment implements
         textViewCurrTemp = (TextView) getActivity().findViewById(R.id.textViewCurrTemp);
         textViewCurrHumidity = (TextView) getActivity().findViewById(R.id.textViewCurrHumidity);
         textViewCurrPressure = (TextView) getActivity().findViewById(R.id.textViewCurrPressure);
-        imageButtonRefresh = (ImageButton) getActivity().findViewById(R.id.imageButtonRefresh);
-        imageButtonLocation = (ImageButton) getActivity().findViewById(R.id.imageButtonLocation);
+        ImageButton imageButtonRefresh = (ImageButton) getActivity().findViewById(R.id.imageButtonRefresh);
+        ImageButton imageButtonLocation = (ImageButton) getActivity().findViewById(R.id.imageButtonLocation);
         progressBar = (ProgressBar) getActivity().findViewById(R.id.progressBar);
-        recyclerViewForecast = (RecyclerView) getActivity().findViewById(R.id.recyclerViewForecast);
+        RecyclerView recyclerViewForecast = (RecyclerView) getActivity().findViewById(R.id.recyclerViewForecast);
 
         recyclerViewForecast.setHasFixedSize(true);
 
-        GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(), 1, 1, false);
+        GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(), getSpanCount(), 1, false);
         recyclerViewForecast.setLayoutManager(gridLayoutManager);
+
+        dfTime = DateFormat.getTimeInstance(DateFormat.SHORT);
 
         arrayListHr = new ArrayList<>();
         arrayListIcon = new ArrayList<>();
@@ -127,9 +126,20 @@ public class OverviewFragment extends android.support.v4.app.Fragment implements
                 break;
             case R.id.imageButtonLocation:
                 progressBar.setVisibility(View.VISIBLE);
-                //TODO API 23 check
-                locationManager.requestLocationUpdates(
-                        LocationManager.GPS_PROVIDER, 5000, 100, locationListener);
+                // API 23 check
+                // if (getActivity().checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED && getActivity().checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                //     locationManager.requestLocationUpdates(
+                //             LocationManager.GPS_PROVIDER, 5000, 100, locationListener);
+                // } else {
+                //     Toast.makeText(getActivity(),
+                //             "This feature requires the ACCESS_FINE_LOCATION and ACCESS_COARSE_LOCATION permissions to be granted.", Toast.LENGTH_SHORT).show();
+                // }
+                try {
+                    locationManager.requestLocationUpdates(
+                            LocationManager.GPS_PROVIDER, 5000, 100, locationListener);
+                } catch (SecurityException e) {
+                    Log.e("TimmoWeather", "SecurityException: Permission requirements not met.");
+                }
                 break;
         }
     }
@@ -198,26 +208,24 @@ public class OverviewFragment extends android.support.v4.app.Fragment implements
             arrayListCondition.clear();
             arrayListTemp.clear();
 
-
-            DateFormat dfTime = DateFormat.getTimeInstance(DateFormat.SHORT);
-            int max;
-            switch (sharedPreferences.getInt("hour_forecast_hours", 1)) {
-                case 0:
-                    max = 2;
+            switch (sharedPreferences.getString("hour_forecast_hours", "12")) {
+                case "6":
+                    max = 3;
                     break;
-                case 1:
-                    max = 4;
+                case "12":
+                    max = 5;
                     break;
-                case 2:
-                    max = 6;
+                case "18":
+                    max = 7;
                     break;
-                case 3:
-                    max = 8;
+                case "24":
+                    max = 9;
                     break;
                 default:
-                    max = 4;
+                    max = 5;
                     break;
             }
+
             for (int i = 0; i < max; i++) {
                 JSONObject mainForecast = jsonForecast.getJSONArray("list").getJSONObject(i).getJSONObject("main");
                 JSONObject detailsForecast = jsonForecast.getJSONArray("list").getJSONObject(i).getJSONArray("weather").getJSONObject(0);
@@ -228,10 +236,14 @@ public class OverviewFragment extends android.support.v4.app.Fragment implements
                 arrayListTemp.add(String.format("%.2f", mainForecast.getDouble("temp")) + "\u2103");
             }
 
+            recyclerViewAdapter.notifyDataSetChanged();
         } catch (Exception e) {
-            Log.e("TimmoWeather", "One or more fields not found in the JSON data");
+            Log.e("TimmoWeather", "One or more fields not found...");
         }
+
+
     }
+
 
     private String setWeatherIconCurr(int actualId, long sunrise, long sunset) {
         int id = actualId / 100;
@@ -302,6 +314,45 @@ public class OverviewFragment extends android.support.v4.app.Fragment implements
         updateWeatherData(city);
     }
 
+    // region getSpanCount
+    private int getSpanCount() {
+        //String toastMsg;
+        int spanCount = 2;
+        int screenSize = getResources().getConfiguration().screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK;
+        int screenOrientation = getResources().getConfiguration().orientation;
+        if (screenSize >= Configuration.SCREENLAYOUT_SIZE_LARGE) {
+            switch (screenOrientation) {
+                case Configuration.ORIENTATION_PORTRAIT:
+                    spanCount = 3;
+                    //toastMsg = "LARGE OR GREATER PORTRAIT";
+                    break;
+                case Configuration.ORIENTATION_LANDSCAPE:
+                    spanCount = 4;
+                    //toastMsg = "LARGE OR GREATER LANDSCAPE";
+                    break;
+                default:
+                    spanCount = 3;
+                    //toastMsg = "LARGE OR GREATER OTHER";
+            }
+        } else if (screenSize == Configuration.SCREENLAYOUT_SIZE_NORMAL) {
+            switch (screenOrientation) {
+                case Configuration.ORIENTATION_PORTRAIT:
+                    spanCount = 2;
+                    //toastMsg = "NORMAL PORTRAIT";
+                    break;
+                case Configuration.ORIENTATION_LANDSCAPE:
+                    spanCount = 3;
+                    //toastMsg = "NORMAL LANDSCAPE";
+                    break;
+                default:
+                    spanCount = 2;
+                    //toastMsg = "NORMAL OTHER";
+            }
+        }
+        return spanCount;
+    }
+    // endregion
+
 
     private class MyLocationListener implements LocationListener {
 
@@ -318,7 +369,7 @@ public class OverviewFragment extends android.support.v4.app.Fragment implements
             //String latitude = "Latitude: " + loc.getLatitude();
             //Log.v(TAG, latitude);
 
-            cityName = null;
+            String cityName = null;
             Geocoder gcd = new Geocoder(getActivity().getBaseContext(), Locale.getDefault());
             List<Address> addresses;
             try {
@@ -331,7 +382,7 @@ public class OverviewFragment extends android.support.v4.app.Fragment implements
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            location = loc.getLongitude() + ", " + loc.getLatitude();
+            //String location = loc.getLongitude() + ", " + loc.getLatitude();
 
             //Toast.makeText(getActivity(), cityName, Toast.LENGTH_SHORT).show();
             changeCity(cityName);

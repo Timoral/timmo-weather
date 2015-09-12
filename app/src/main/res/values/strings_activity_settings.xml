@@ -1,12 +1,12 @@
-<resources>
-    <string name="title_activity_settings">Settings</string>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="title_activity_settings" tools:ignore="UnusedResources">Settings</string>
 
     <!-- General settings -->
     <string name="pref_header_general">General</string>
 
     <string name="pref_title_dark_theme">Dark Theme</string>
     <string name="pref_summary_off_dark_theme">Switch application theme to a dark variant</string>
-    <string name="pref_summary_on_dark_theme">Switch application theme to a light variant</string>
+    <string name="pref_summary_on_dark_theme" tools:ignore="UnusedResources">Switch application theme to a light variant</string>
 
     <!-- Overview Page settings -->
     <string name="pref_header_overview">Overview Page</string>
