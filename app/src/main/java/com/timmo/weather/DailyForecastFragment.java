@@ -12,7 +12,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -27,6 +26,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -43,7 +44,7 @@ public class DailyForecastFragment extends android.support.v4.app.Fragment imple
     private LocationManager locationManager;
     private LocationListener locationListener;
     private TextView textViewForecastCity;
-    private ArrayList<String> arrayListDay, arrayListIcon, arrayListCondition, arrayListTempMin, arrayListTempMax;
+    private ArrayList<String> arrayListDay, arrayListIcon, arrayListCondition, arrayListTempMin, arrayListTempMax, arrayListWind;
     private RecyclerView.Adapter recyclerViewAdapter;
     private SharedPreferences sharedPreferences;
     private SwipeRefreshLayout swipeRefreshLayout;
@@ -114,9 +115,10 @@ public class DailyForecastFragment extends android.support.v4.app.Fragment imple
         arrayListCondition = new ArrayList<>();
         arrayListTempMin = new ArrayList<>();
         arrayListTempMax = new ArrayList<>();
+        arrayListWind = new ArrayList<>();
 
         recyclerViewAdapter = new DailyForecastRecyclerViewAdapter
-                (getActivity(), arrayListDay, arrayListIcon, arrayListCondition, arrayListTempMin, arrayListTempMax);
+                (getActivity(), arrayListDay, arrayListIcon, arrayListCondition, arrayListTempMin, arrayListTempMax, arrayListWind);
         recyclerViewForecast.setAdapter(recyclerViewAdapter);
 
         imageButtonRefresh.setOnClickListener(this);
@@ -165,7 +167,7 @@ public class DailyForecastFragment extends android.support.v4.app.Fragment imple
     private void updateWeatherData(final String city) {
         new Thread() {
             public void run() {
-                final JSONObject jsonForecastDaily = RemoteFetchDailyForecast.getJSON(getActivity(), city);
+                final JSONObject jsonForecastDaily = RemoteFetchOWMDailyForecast.getJSON(getActivity(), city);
                 if (jsonForecastDaily == null) {
                     handler.post(new Runnable() {
                         public void run() {
@@ -191,14 +193,15 @@ public class DailyForecastFragment extends android.support.v4.app.Fragment imple
         try {
 
             JSONObject location = jsonForecastDaily.getJSONObject("city");
-
-            textViewForecastCity.setText(location.getString("name") + ", " + location.getString("country"));
+            String city = location.getString("name") + ", " + location.getString("country");
+            textViewForecastCity.setText(city);
 
             arrayListDay.clear();
             arrayListIcon.clear();
             arrayListCondition.clear();
             arrayListTempMin.clear();
             arrayListTempMax.clear();
+            arrayListWind.clear();
 
             DateFormat dfForecastDay = new SimpleDateFormat("EEE", Locale.getDefault());
             DateFormat dfForecast = DateFormat.getDateInstance(DateFormat.MEDIUM);
@@ -208,25 +211,69 @@ public class DailyForecastFragment extends android.support.v4.app.Fragment imple
 
                 Date date = new Date(forecast.getLong("dt") * 1000);
                 arrayListDay.add(dfForecastDay.format(date) + " " + dfForecast.format(date));
-                arrayListIcon.add(setWeatherIconForecast(forecast.getJSONArray("weather").getJSONObject(0).getInt("id")));
+                arrayListIcon.add(setWeatherIcon(forecast.getJSONArray("weather").getJSONObject(0).getInt("id")));
                 String conditionForecast = forecast.getJSONArray("weather").getJSONObject(0).getString("description").toUpperCase(Locale.getDefault());
                 if (conditionForecast.equals("SKY IS CLEAR")) {
                     conditionForecast = "CLEAR SKIES";
                 }
                 arrayListCondition.add(conditionForecast);
-                //TODO Set either degrees or fahrenheit depending on location
-                arrayListTempMin.add(getResources().getString(R.string.name_temperature_min) + " " + String.format("%.1f", forecast.getJSONObject("temp").getDouble("min")) + "\u2103");
-                arrayListTempMax.add(getResources().getString(R.string.name_temperature_max) + " " + String.format("%.1f", forecast.getJSONObject("temp").getDouble("max")) + "\u2103");
+                String tempMin, tempMax;
+                switch (sharedPreferences.getString("temp_scale", "0")) {
+                    case "0":
+                        tempMin = getResources().getString(R.string.name_temperature_min) + " " + String.format("%.1f", forecast.getJSONObject("temp").getDouble("min")) + "\u2103";
+                        tempMax = getResources().getString(R.string.name_temperature_max) + " " + String.format("%.1f", forecast.getJSONObject("temp").getDouble("max")) + "\u2103";
+                        break;
+                    case "1":
+                        tempMin = getResources().getString(R.string.name_temperature_min) + " " + String.format("%.1f", convertToFahrenheit(forecast.getJSONObject("temp").getDouble("min"))) + "\u2109";
+                        tempMax = getResources().getString(R.string.name_temperature_max) + " " + String.format("%.1f", convertToFahrenheit(forecast.getJSONObject("temp").getDouble("max"))) + "\u2109";
+                        break;
+                    default:
+                        tempMin = getResources().getString(R.string.name_temperature_min) + " " + String.format("%.1f", forecast.getJSONObject("temp").getDouble("min")) + "\u2103";
+                        tempMax = getResources().getString(R.string.name_temperature_max) + " " + String.format("%.1f", forecast.getJSONObject("temp").getDouble("max")) + "\u2103";
+                        break;
+                }
+                arrayListTempMin.add(tempMin);
+                arrayListTempMax.add(tempMax);
+                String windSpeed;
+                switch (sharedPreferences.getString("wind_speed", "0")) {
+                    case "0":
+                        windSpeed = getResources().getString(R.string.name_wind) + " " + forecast.getDouble("speed") + "mph";
+                        break;
+                    case "1":
+                        windSpeed = getResources().getString(R.string.name_wind) + " " + convertToKPH(forecast.getDouble("speed")) + "kph";
+                        break;
+                    default:
+                        windSpeed = getResources().getString(R.string.name_wind) + " " + forecast.getDouble("speed") + "mph";
+                        break;
+                }
+
+                arrayListWind.add(windSpeed);
             }
 
             recyclerViewAdapter.notifyDataSetChanged();
         } catch (JSONException e) {
-            Log.e("TimmoWeather", "One or more fields not found...");
+            Log.e("Timmo Weather", "One or more fields not found...");
         }
 
     }
 
-    private String setWeatherIconForecast(int actualId) {
+    private Double convertToFahrenheit(Double celsius) {
+        return (9.0 / 5.0) * celsius + 32;
+    }
+
+    private Double convertToKPH(Double miles) {
+        return round(miles * 1.609344, 2);
+    }
+
+    public static double round(double value, int places) {
+        if (places < 0) throw new IllegalArgumentException();
+
+        BigDecimal bd = new BigDecimal(value);
+        bd = bd.setScale(places, RoundingMode.HALF_UP);
+        return bd.doubleValue();
+    }
+
+    private String setWeatherIcon(int actualId) {
         int id = actualId / 100;
         String icon = "";
         if (actualId == 800) {

@@ -83,15 +83,22 @@
                     android:layout_marginRight="@dimen/activity_horizontal_margin"
                     android:orientation="horizontal">
 
-                    <TextView
-                        android:id="@+id/textViewCurrIcon"
-                        style="@style/textAppearanceLarge"
+                    <LinearLayout
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginLeft="@dimen/activity_horizontal_margin"
-                        android:layout_marginRight="@dimen/activity_horizontal_margin"
-                        android:text="@string/weather_cloudy"
-                        android:textSize="100sp" />
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/textViewCurrIcon"
+                            style="@style/textAppearanceLarge"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="@dimen/activity_horizontal_margin"
+                            android:layout_marginRight="@dimen/activity_horizontal_margin"
+                            android:text="@string/weather_cloudy"
+                            android:textSize="100sp" />
+                    </LinearLayout>
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -107,10 +114,10 @@
                             <TextView
                                 android:id="@+id/textViewCurrCondition"
                                 style="@style/textAppearanceMedium"
-                                android:textSize="20sp"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="@string/name_condition" />
+                                android:text="@string/name_condition"
+                                android:textSize="20sp" />
 
                             <TextView
                                 android:id="@+id/textViewCurrTemp"

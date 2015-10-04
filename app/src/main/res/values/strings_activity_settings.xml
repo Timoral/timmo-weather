@@ -8,8 +8,48 @@
     <string name="pref_summary_off_dark_theme">Switch application theme to a dark variant</string>
     <string name="pref_summary_on_dark_theme" tools:ignore="UnusedResources">Switch application theme to a light variant</string>
 
+<!--
+    <string name="pref_title_source">Weather Source</string>
+    <string name="pref_summary_source">Choose your weather provider</string>
+-->
+
+    <string name="pref_title_temp_scale">Temperature Scale</string>
+    <string name="pref_summary_temp_scale">Set temperature scale</string>
+
+    <string name="pref_title_wind_speed">Wind Speed</string>
+    <string name="pref_summary_wind_speed">Set wind speed</string>
+
     <string name="pref_title_starting_page">Starting Page</string>
     <string name="pref_summary_starting_page">Which page to load on app startup</string>
+
+<!--
+    <string-array name="source">
+        <item>Open Weather Map</item>
+        <item>Yahoo Weather</item>
+    </string-array>
+    <string-array name="source_values">
+        <item>0</item>
+        <item>1</item>
+    </string-array>
+-->
+
+    <string-array name="temp_scale">
+        <item>Celsius (Default)</item>
+        <item>Fahrenheit</item>
+    </string-array>
+    <string-array name="temp_scale_values">
+        <item>0</item>
+        <item>1</item>
+    </string-array>
+
+    <string-array name="wind_speed">
+        <item>MPH (Default)</item>
+        <item>KPH</item>
+    </string-array>
+    <string-array name="wind_speed_values">
+        <item>0</item>
+        <item>1</item>
+    </string-array>
 
     <string-array name="starting_page">
         <item>Overview (Default)</item>

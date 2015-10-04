@@ -1,5 +1,6 @@
 package com.timmo.weather;
 
+import android.annotation.SuppressLint;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -96,17 +97,15 @@ public class MainActivity extends AppCompatActivity {
         final AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Change city");
 
-        View view = getLayoutInflater().inflate(R.layout.dialog_change_city, null);
+        @SuppressLint("InflateParams") View view = getLayoutInflater().inflate(R.layout.dialog_change_city, null);
 
-        EditText editTextInput = (EditText) view.findViewById(R.id.editTextInput);
-
-        final String input = editTextInput.getText().toString();
+        final EditText editTextInput = (EditText) view.findViewById(R.id.editTextInput);
 
         builder.setView(view);
         builder.setPositiveButton("Go", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                changeCity(input);
+                changeCity(editTextInput.getText().toString());
                 dialog.dismiss();
             }
         });

@@ -18,14 +18,16 @@ public class HourForecastRecyclerViewAdapter extends RecyclerView.Adapter<HourFo
     private final ArrayList<String> arrayListIcon;
     private final ArrayList<String> arrayListCondition;
     private final ArrayList<String> arrayListTemp;
+    private final ArrayList<String> arrayListWind;
 
     public HourForecastRecyclerViewAdapter(Context context, ArrayList<String> hr, ArrayList<String> icon,
-                                           ArrayList<String> condition, ArrayList<String> temp) {
+                                           ArrayList<String> condition, ArrayList<String> temp, ArrayList<String> wind) {
         mContext = context;
         arrayListHr = hr;
         arrayListIcon = icon;
         arrayListCondition = condition;
         arrayListTemp = temp;
+        arrayListWind = wind;
     }
 
     @Override
@@ -46,6 +48,7 @@ public class HourForecastRecyclerViewAdapter extends RecyclerView.Adapter<HourFo
         holder.textViewIcon.setText(arrayListIcon.get(position));
         holder.textViewCondition.setText(arrayListCondition.get(position));
         holder.textViewTemp.setText(arrayListTemp.get(position));
+        holder.textViewWind.setText(arrayListWind.get(position));
 
         holder.cardViewForecast.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -62,7 +65,7 @@ public class HourForecastRecyclerViewAdapter extends RecyclerView.Adapter<HourFo
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         public final CardView cardViewForecast;
-        public final TextView textViewHr, textViewIcon, textViewCondition, textViewTemp;
+        public final TextView textViewHr, textViewIcon, textViewCondition, textViewTemp, textViewWind;
 
         public ViewHolder(View v) {
             super(v);
@@ -71,6 +74,7 @@ public class HourForecastRecyclerViewAdapter extends RecyclerView.Adapter<HourFo
             textViewIcon = (TextView) v.findViewById(R.id.textViewIcon);
             textViewCondition = (TextView) v.findViewById(R.id.textViewCondition);
             textViewTemp = (TextView) v.findViewById(R.id.textViewTemp);
+            textViewWind = (TextView) v.findViewById(R.id.textViewWind);
         }
     }
 }

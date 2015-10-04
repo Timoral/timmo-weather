@@ -39,7 +39,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:text="@string/weather_cloudy"
-                android:textSize="60sp" />
+                android:textSize="70sp" />
 
             <TextView
                 android:id="@+id/textViewCondition"
@@ -55,6 +55,14 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/name_temperature"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/textViewWind"
+                style="@style/textAppearanceMedium"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/name_wind"
                 android:textSize="14sp" />
         </LinearLayout>
     </LinearLayout>

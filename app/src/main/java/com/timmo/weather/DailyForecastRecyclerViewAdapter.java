@@ -18,16 +18,18 @@ public class DailyForecastRecyclerViewAdapter extends RecyclerView.Adapter<Daily
     private final ArrayList<String> arrayListCondition;
     private final ArrayList<String> arrayListTempMin;
     private final ArrayList<String> arrayListTempMax;
+    private final ArrayList<String> arrayListWind;
 
     public DailyForecastRecyclerViewAdapter(Context context, ArrayList<String> hr,
                                             ArrayList<String> icon, ArrayList<String> condition,
-                                            ArrayList<String> tempMin, ArrayList<String> tempMax) {
+                                            ArrayList<String> tempMin, ArrayList<String> tempMax, ArrayList<String> wind) {
         mContext = context;
         arrayListHr = hr;
         arrayListIcon = icon;
         arrayListCondition = condition;
         arrayListTempMin = tempMin;
         arrayListTempMax = tempMax;
+        arrayListWind = wind;
     }
 
     @Override
@@ -49,6 +51,7 @@ public class DailyForecastRecyclerViewAdapter extends RecyclerView.Adapter<Daily
         holder.textViewCondition.setText(arrayListCondition.get(position));
         holder.textViewTempMin.setText(arrayListTempMin.get(position));
         holder.textViewTempMax.setText(arrayListTempMax.get(position));
+        holder.textViewWind.setText(arrayListWind.get(position));
     }
 
     @Override
@@ -57,7 +60,7 @@ public class DailyForecastRecyclerViewAdapter extends RecyclerView.Adapter<Daily
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        public final TextView textViewDay, textViewIcon, textViewCondition, textViewTempMin, textViewTempMax;
+        public final TextView textViewDay, textViewIcon, textViewCondition, textViewTempMin, textViewTempMax, textViewWind;
 
         public ViewHolder(View v) {
             super(v);
@@ -66,6 +69,7 @@ public class DailyForecastRecyclerViewAdapter extends RecyclerView.Adapter<Daily
             textViewCondition = (TextView) v.findViewById(R.id.textViewCondition);
             textViewTempMin = (TextView) v.findViewById(R.id.textViewTempMin);
             textViewTempMax = (TextView) v.findViewById(R.id.textViewTempMax);
+            textViewWind = (TextView) v.findViewById(R.id.textViewWind);
         }
     }
 }

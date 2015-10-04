@@ -44,7 +44,7 @@ public class SettingsActivity extends PreferenceActivity {
         preferenceReset.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                sharedPreferences.edit().clear().commit();
+                sharedPreferences.edit().clear().apply();
                 startActivity(new Intent(SettingsActivity.this, MainActivity.class));
                 finish();
                 return false;

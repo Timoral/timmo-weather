@@ -27,6 +27,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -45,8 +47,7 @@ public class OverviewFragment extends android.support.v4.app.Fragment implements
     private LocationListener locationListener;
     private TextView textViewCurrCity, textViewUpdated, textViewCurrIcon, textViewCurrCondition,
             textViewCurrTemp, textViewCurrHumidity, textViewCurrPressure, textViewCurrWind;
-    private ArrayList<String> arrayListHr, arrayListIcon, arrayListCondition, arrayListTemp;
-    private int max;
+    private ArrayList<String> arrayListHr, arrayListIcon, arrayListCondition, arrayListTemp, arrayListWind;
     private RecyclerView.Adapter recyclerViewAdapter;
     private SharedPreferences sharedPreferences;
     private SwipeRefreshLayout swipeRefreshLayout;
@@ -120,9 +121,10 @@ public class OverviewFragment extends android.support.v4.app.Fragment implements
         arrayListIcon = new ArrayList<>();
         arrayListCondition = new ArrayList<>();
         arrayListTemp = new ArrayList<>();
+        arrayListWind = new ArrayList<>();
 
         recyclerViewAdapter = new HourForecastRecyclerViewAdapter
-                (getActivity(), arrayListHr, arrayListIcon, arrayListCondition, arrayListTemp);
+                (getActivity(), arrayListHr, arrayListIcon, arrayListCondition, arrayListTemp, arrayListWind);
         recyclerViewForecast.setAdapter(recyclerViewAdapter);
 
         textViewCurrIcon.setTypeface(weatherFont);
@@ -171,8 +173,24 @@ public class OverviewFragment extends android.support.v4.app.Fragment implements
     private void updateWeatherData(final String city) {
         new Thread() {
             public void run() {
-                final JSONObject jsonCurrent = RemoteFetchCurrent.getJSON(getActivity(), city);
-                final JSONObject jsonForecast = RemoteFetchForecast.getJSON(getActivity(), city);
+                final JSONObject jsonCurrent = RemoteFetchOWMCurrent.getJSON(getActivity(), city);
+                final JSONObject jsonForecast = RemoteFetchOWMForecast.getJSON(getActivity(), city);
+/*
+                switch (sharedPreferences.getString("source", "0")) {
+                    case "0":
+                        jsonCurrent = RemoteFetchOWMCurrent.getJSON(getActivity(), city);
+                        jsonForecast = RemoteFetchOWMForecast.getJSON(getActivity(), city);
+                        break;
+                    case "1":
+                        jsonCurrent = RemoteFetchYahooCurrent.getJSON(getActivity(), city);
+                        jsonForecast = RemoteFetchOWMForecast.getJSON(getActivity(), city);
+                        break;
+                    default:
+                        jsonCurrent = RemoteFetchOWMCurrent.getJSON(getActivity(), city);
+                        jsonForecast = RemoteFetchOWMForecast.getJSON(getActivity(), city);
+                        break;
+                }
+*/
                 if (jsonCurrent == null) {
                     handler.post(new Runnable() {
                         public void run() {
@@ -206,7 +224,8 @@ public class OverviewFragment extends android.support.v4.app.Fragment implements
 
     private void renderWeather(JSONObject jsonCurrent, JSONObject jsonForecast) {
         try {
-            textViewCurrCity.setText(jsonCurrent.getString("name") + ", " + jsonCurrent.getJSONObject("sys").getString("country"));
+            String currCity = jsonCurrent.getString("name") + ", " + jsonCurrent.getJSONObject("sys").getString("country");
+            textViewCurrCity.setText(currCity);
 
             JSONObject detailsCurr = jsonCurrent.getJSONArray("weather").getJSONObject(0);
             String currCondition = detailsCurr.getString("description").toUpperCase(Locale.getDefault());
@@ -215,26 +234,54 @@ public class OverviewFragment extends android.support.v4.app.Fragment implements
             }
             textViewCurrCondition.setText(currCondition);
 
-            textViewCurrIcon.setText(setWeatherIconCurr(detailsCurr.getInt("id"),
+            textViewCurrIcon.setText(setWeatherIcon(detailsCurr.getInt("id"),
                     jsonCurrent.getJSONObject("sys").getLong("sunrise") * 1000,
                     jsonCurrent.getJSONObject("sys").getLong("sunset") * 1000));
 
             JSONObject mainCurr = jsonCurrent.getJSONObject("main");
-            //TODO Set either degrees or farenheight depending on location
-            textViewCurrTemp.setText(getResources().getString(R.string.name_temperature) + " " + String.format("%.2f", mainCurr.getDouble("temp")) + "\u2103");
-            textViewCurrHumidity.setText(getResources().getString(R.string.name_humidity) + " " + mainCurr.getString("humidity") + "%");
-            textViewCurrPressure.setText(getResources().getString(R.string.name_pressure) + " " + mainCurr.getString("pressure") + " hPa");
-            textViewCurrWind.setText(getResources().getString(R.string.name_wind) + " " + jsonCurrent.getJSONObject("wind").getString("speed") + " mph");
+
+            String tempCurr;
+            switch (sharedPreferences.getString("temp_scale", "0")) {
+                case "0":
+                    tempCurr = getResources().getString(R.string.name_temperature) + " " + String.format("%.2f", mainCurr.getDouble("temp")) + "\u2103";
+                    break;
+                case "1":
+                    tempCurr = getResources().getString(R.string.name_temperature) + " " + String.format("%.2f", convertToFahrenheit(mainCurr.getDouble("temp"))) + "\u2109";
+                    break;
+                default:
+                    tempCurr = getResources().getString(R.string.name_temperature) + " " + String.format("%.2f", mainCurr.getDouble("temp")) + "\u2103";
+                    break;
+            }
+            textViewCurrTemp.setText(tempCurr);
+            String humidity = getResources().getString(R.string.name_humidity) + " " + mainCurr.getString("humidity") + "%";
+            String pressure = getResources().getString(R.string.name_pressure) + " " + mainCurr.getString("pressure") + "hPa";
+            textViewCurrHumidity.setText(humidity);
+            textViewCurrPressure.setText(pressure);
+            String windSpeedCurr;
+            switch (sharedPreferences.getString("wind_speed", "0")) {
+                case "0":
+                    windSpeedCurr = getResources().getString(R.string.name_wind) + " " + jsonCurrent.getJSONObject("wind").getDouble("speed") + "mph";
+                    break;
+                case "1":
+                    windSpeedCurr = getResources().getString(R.string.name_wind) + " " + convertToKPH(jsonCurrent.getJSONObject("wind").getDouble("speed")) + "kph";
+                    break;
+                default:
+                    windSpeedCurr = getResources().getString(R.string.name_wind) + " " + jsonCurrent.getJSONObject("wind").getDouble("speed") + "mph";
+                    break;
+            }
+            textViewCurrWind.setText(windSpeedCurr);
 
             DateFormat df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT);
-            String updatedOn = df.format(new Date(jsonCurrent.getLong("dt") * 1000));
-            textViewUpdated.setText(getResources().getString(R.string.name_updated) + updatedOn);
+            String updated = getResources().getString(R.string.name_updated) + df.format(new Date(jsonCurrent.getLong("dt") * 1000));
+            textViewUpdated.setText(updated);
 
             arrayListHr.clear();
             arrayListIcon.clear();
             arrayListCondition.clear();
             arrayListTemp.clear();
+            arrayListWind.clear();
 
+            int max;
             switch (sharedPreferences.getString("hour_forecast_hours", "1")) {
                 case "0":
                     max = 3;
@@ -259,19 +306,44 @@ public class OverviewFragment extends android.support.v4.app.Fragment implements
             for (int i = 0; i < max; i++) {
                 JSONObject mainForecast = jsonForecast.getJSONArray("list").getJSONObject(i).getJSONObject("main");
                 JSONObject detailsForecast = jsonForecast.getJSONArray("list").getJSONObject(i).getJSONArray("weather").getJSONObject(0);
+                JSONObject windForecast = jsonForecast.getJSONArray("list").getJSONObject(i).getJSONObject("wind");
 
                 Date date = new Date(jsonForecast.getJSONArray("list").getJSONObject(i).getLong("dt") * 1000);
                 arrayListHr.add(dfForecastDay.format(date) + " " + dfForecastTime.format(date));
-                arrayListIcon.add(setWeatherIconForecast(detailsForecast.getInt("id")));
+                arrayListIcon.add(setWeatherIcon(detailsForecast.getInt("id"),
+                        jsonCurrent.getJSONObject("sys").getLong("sunrise") * 1000,
+                        jsonCurrent.getJSONObject("sys").getLong("sunset") * 1000));
                 String conditionForecast = detailsForecast.getString("description").toUpperCase(Locale.getDefault());
                 if (conditionForecast.equals("SKY IS CLEAR")) {
                     conditionForecast = "CLEAR SKIES";
                 }
                 arrayListCondition.add(conditionForecast);
-                //TODO Set either degrees or farenheight depending on location
-                arrayListTemp.add(getResources().getString(R.string.name_temperature) + " " + String.format("%.1f", mainForecast.getDouble("temp")) + "\u2103");
-            }
+                switch (sharedPreferences.getString("temp_scale", "0")) {
+                    case "0":
+                        arrayListTemp.add(getResources().getString(R.string.name_temperature) + " " + String.format("%.1f", mainForecast.getDouble("temp")) + "\u2103");
+                        break;
+                    case "1":
+                        arrayListTemp.add(getResources().getString(R.string.name_temperature) + " " + String.format("%.1f", convertToFahrenheit(mainForecast.getDouble("temp"))) + "\u2109");
+                        break;
+                    default:
+                        arrayListTemp.add(getResources().getString(R.string.name_temperature) + " " + String.format("%.1f", mainForecast.getDouble("temp")) + "\u2103");
+                        break;
+                }
+                String windSpeed;
+                switch (sharedPreferences.getString("wind_speed", "0")) {
+                    case "0":
+                        windSpeed = getResources().getString(R.string.name_wind) + " " + windForecast.getDouble("speed") + "mph";
+                        break;
+                    case "1":
+                        windSpeed = getResources().getString(R.string.name_wind) + " " + convertToKPH(windForecast.getDouble("speed")) + "kph";
+                        break;
+                    default:
+                        windSpeed = getResources().getString(R.string.name_wind) + " " + windForecast.getDouble("speed") + "mph";
+                        break;
+                }
 
+                arrayListWind.add(windSpeed);
+            }
             recyclerViewAdapter.notifyDataSetChanged();
         } catch (JSONException e) {
             Log.e("TimmoWeather", "One or more fields not found...");
@@ -280,8 +352,23 @@ public class OverviewFragment extends android.support.v4.app.Fragment implements
 
     }
 
+    private Double convertToFahrenheit(Double celsius) {
+        return (9.0 / 5.0) * celsius + 32;
+    }
 
-    private String setWeatherIconCurr(int actualId, long sunrise, long sunset) {
+    private Double convertToKPH(Double miles) {
+        return round(miles * 1.609344, 2);
+    }
+
+    public static double round(double value, int places) {
+        if (places < 0) throw new IllegalArgumentException();
+
+        BigDecimal bd = new BigDecimal(value);
+        bd = bd.setScale(places, RoundingMode.HALF_UP);
+        return bd.doubleValue();
+    }
+
+    private String setWeatherIcon(int actualId, long sunrise, long sunset) {
         int id = actualId / 100;
         String icon = "";
         if (actualId == 800) {
@@ -316,51 +403,12 @@ public class OverviewFragment extends android.support.v4.app.Fragment implements
         return icon;
     }
 
-    private String setWeatherIconForecast(int actualId) {
-        int id = actualId / 100;
-        String icon = "";
-        if (actualId == 800) {
-            icon = getActivity().getString(R.string.weather_sunny);
-        } else {
-            switch (id) {
-                case 2:
-                    icon = getActivity().getString(R.string.weather_thunder);
-                    break;
-                case 3:
-                    icon = getActivity().getString(R.string.weather_drizzle);
-                    break;
-                case 7:
-                    icon = getActivity().getString(R.string.weather_foggy);
-                    break;
-                case 8:
-                    icon = getActivity().getString(R.string.weather_cloudy);
-                    break;
-                case 6:
-                    icon = getActivity().getString(R.string.weather_snowy);
-                    break;
-                case 5:
-                    icon = getActivity().getString(R.string.weather_rainy);
-                    break;
-            }
-        }
-        return icon;
-    }
-
     public void changeCity(String city) {
         updateWeatherData(city);
     }
 
     // region getSpanCount
     private int getSpanCount() {
-        int screenSize = getResources().getConfiguration().screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK;
-        if (screenSize >= Configuration.SCREENLAYOUT_SIZE_LARGE) {
-            return 3;
-        } else {
-            return 2;
-        }
-    }
-
-    private int getScreenType() {
         int screenSize = getResources().getConfiguration().screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK;
         if (screenSize >= Configuration.SCREENLAYOUT_SIZE_LARGE) {
             return 3;

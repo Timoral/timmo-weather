@@ -12,14 +12,12 @@ class CityPreference {
         prefs = PreferenceManager.getDefaultSharedPreferences(activity);
     }
 
-    // If the user has not chosen a city yet, return
-    // Sydney as the default city
     String getCity() {
         return prefs.getString("city", "London");
     }
 
     void setCity(String city) {
-        prefs.edit().putString("city", city).commit();
+        prefs.edit().putString("city", city).apply();
     }
 
 }
