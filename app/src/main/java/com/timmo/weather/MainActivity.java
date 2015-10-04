@@ -11,7 +11,6 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -42,6 +41,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // AdView mAdView = (AdView) findViewById(R.id.adView);
+        // AdRequest adRequest = new AdRequest.Builder().build();
+        // mAdView.loadAd(adRequest);
+
         mTitle = mDrawerTitle = getTitle();
         mTitles = getResources().getStringArray(R.array.navigation_array);
 
@@ -61,28 +64,31 @@ public class MainActivity extends AppCompatActivity {
 
         // ActionBarDrawerToggle ties together the the proper interactions
         // between the sliding drawer and the action bar app icon
-        mDrawerToggle = new ActionBarDrawerToggle(
-                this,                  /* host Activity */
-                mDrawerLayout,         /* DrawerLayout object */
-                //R.drawable.ic_drawer,  /* nav drawer image to replace 'Up' caret */
-                R.string.drawer_open,  /* "open drawer" description for accessibility */
-                R.string.drawer_close  /* "close drawer" description for accessibility */
-        ) {
+        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.string.drawer_open, R.string.drawer_close) {
             public void onDrawerClosed(View view) {
                 getSupportActionBar().setTitle(mTitle);
-                invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
+                invalidateOptionsMenu();
             }
 
             public void onDrawerOpened(View drawerView) {
                 getSupportActionBar().setTitle(mDrawerTitle);
-                invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
+                invalidateOptionsMenu();
             }
         };
         mDrawerLayout.setDrawerListener(mDrawerToggle);
 
-
         if (savedInstanceState == null) {
-            selectItem(0);
+            switch (sharedPreferences.getString("starting_page", "0")) {
+                case "0":
+                    selectItem(0);
+                    break;
+                case "1":
+                    selectItem(1);
+                    break;
+                default:
+                    selectItem(0);
+                    break;
+            }
         }
     }
 
@@ -115,7 +121,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void changeCity(String city) {
         OverviewFragment overviewFragment = (OverviewFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.frameLayoutOverview);
+                .findFragmentById(R.id.content_frame);
         overviewFragment.changeCity(city);
         new CityPreference(this).setCity(city);
     }
@@ -137,8 +143,10 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        switch (id) {
+        if (mDrawerToggle.onOptionsItemSelected(item)) {
+            return true;
+        }
+        switch (item.getItemId()) {
             case R.id.action_change_city:
                 showInputDialog();
                 return true;
@@ -164,6 +172,15 @@ public class MainActivity extends AppCompatActivity {
 
                 fragmentManager.beginTransaction().replace(R.id.content_frame,
                         overviewFragment).commit();
+                break;
+            case 1:
+                android.support.v4.app.Fragment forecastFragment = new DailyForecastFragment();
+                Bundle forecastArgs = new Bundle();
+                forecastArgs.putInt(OverviewFragment.ARG_OVERVIEW, position);
+                forecastFragment.setArguments(forecastArgs);
+
+                fragmentManager.beginTransaction().replace(R.id.content_frame,
+                        forecastFragment).commit();
                 break;
         }
         // update selected item and title, then close the drawer
@@ -193,12 +210,10 @@ public class MainActivity extends AppCompatActivity {
         mDrawerToggle.onConfigurationChanged(newConfig);
     }
 
-    /* The click listener for ListView in the navigation drawer */
     private class DrawerItemClickListener implements ListView.OnItemClickListener {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             selectItem(position);
         }
     }
-
 }

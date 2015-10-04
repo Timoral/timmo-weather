@@ -6,15 +6,28 @@
             android:summaryOff="@string/pref_summary_off_dark_theme"
             android:summaryOn="@string/pref_summary_off_dark_theme"
             android:title="@string/pref_title_dark_theme" />
+        <ListPreference
+            android:defaultValue="0"
+            android:entries="@array/starting_page"
+            android:entryValues="@array/starting_page_values"
+            android:key="starting_page"
+            android:summary="@string/pref_summary_starting_page"
+            android:title="@string/pref_title_starting_page" />
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/pref_header_overview">
         <ListPreference
+            android:defaultValue="1"
             android:entries="@array/hour_forecast_hours"
             android:entryValues="@array/hour_forecast_hours_values"
             android:key="hour_forecast_hours"
-            android:defaultValue="1"
             android:summary="@string/pref_summary_hour_forecast_hours"
             android:title="@string/pref_title_hour_forecast_hours" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="@string/pref_header_reset">
+        <Preference
+            android:key="reset"
+            android:summary="@string/pref_summary_reset"
+            android:title="@string/pref_title_reset" />
     </PreferenceCategory>
 
 </PreferenceScreen>

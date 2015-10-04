@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:card_view="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/cardViewForecast"
+    android:id="@+id/cardViewDailyForecast"
     style="?attr/cardStyle"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -25,11 +25,11 @@
             android:orientation="vertical">
 
             <TextView
-                android:id="@+id/textViewHr"
+                android:id="@+id/textViewDay"
                 style="@style/textAppearanceLarge"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/name_hr"
+                android:text="@string/name_day"
                 android:textSize="16sp" />
 
             <TextView
@@ -39,7 +39,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:text="@string/weather_cloudy"
-                android:textSize="60sp" />
+                android:textSize="80sp" />
 
             <TextView
                 android:id="@+id/textViewCondition"
@@ -50,11 +50,19 @@
                 android:textSize="14sp" />
 
             <TextView
-                android:id="@+id/textViewTemp"
+                android:id="@+id/textViewTempMin"
                 style="@style/textAppearanceMedium"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/name_temperature"
+                android:text="@string/name_temperature_min"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/textViewTempMax"
+                style="@style/textAppearanceMedium"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/name_temperature_max"
                 android:textSize="14sp" />
         </LinearLayout>
     </LinearLayout>

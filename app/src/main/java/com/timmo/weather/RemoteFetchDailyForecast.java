@@ -9,10 +9,10 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-class RemoteFetchCurrent {
+class RemoteFetchDailyForecast {
 
     private static final String OPEN_WEATHER_MAP_API =
-            "http://api.openweathermap.org/data/2.5/weather?q=%s&units=metric";
+            "http://api.openweathermap.org/data/2.5/forecast/daily?q=%s&units=metric&cnt=16";
 
     public static JSONObject getJSON(Context context, String city) {
         try {

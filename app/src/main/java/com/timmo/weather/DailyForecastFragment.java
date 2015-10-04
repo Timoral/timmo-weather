@@ -3,7 +3,6 @@ package com.timmo.weather;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
-import android.graphics.Typeface;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -13,6 +12,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -34,19 +34,16 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-public class OverviewFragment extends android.support.v4.app.Fragment implements View.OnClickListener {
+public class DailyForecastFragment extends android.support.v4.app.Fragment implements View.OnClickListener {
 
 
     // region Global Vars
-    public static final String ARG_OVERVIEW = "OVERVIEW";
+    public static final String ARG_FORECAST = "FORECAST";
     private final Handler handler;
-    private Typeface weatherFont;
     private LocationManager locationManager;
     private LocationListener locationListener;
-    private TextView textViewCurrCity, textViewUpdated, textViewCurrIcon, textViewCurrCondition,
-            textViewCurrTemp, textViewCurrHumidity, textViewCurrPressure, textViewCurrWind;
-    private ArrayList<String> arrayListHr, arrayListIcon, arrayListCondition, arrayListTemp;
-    private int max;
+    private TextView textViewForecastCity;
+    private ArrayList<String> arrayListDay, arrayListIcon, arrayListCondition, arrayListTempMin, arrayListTempMax;
     private RecyclerView.Adapter recyclerViewAdapter;
     private SharedPreferences sharedPreferences;
     private SwipeRefreshLayout swipeRefreshLayout;
@@ -54,7 +51,7 @@ public class OverviewFragment extends android.support.v4.app.Fragment implements
     private GridLayoutManager gridLayoutManager;
     //endregion
 
-    public OverviewFragment() {
+    public DailyForecastFragment() {
         handler = new Handler();
     }
 
@@ -62,12 +59,13 @@ public class OverviewFragment extends android.support.v4.app.Fragment implements
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_overview, container, false);
-        int i = getArguments().getInt(ARG_OVERVIEW);
-        String notes = getResources().getStringArray(R.array.navigation_array)[i];
-        getActivity().setTitle(notes);
+        View rootView = inflater.inflate(R.layout.fragment_forecast, container, false);
+        int i = getArguments().getInt(ARG_FORECAST);
+        String forecast = getResources().getStringArray(R.array.navigation_array)[i];
+        getActivity().setTitle(forecast);
         return rootView;
     }
+    //endregion
 
     //region onViewCreated
     @Override
@@ -75,18 +73,13 @@ public class OverviewFragment extends android.support.v4.app.Fragment implements
         super.onViewCreated(view, savedInstanceState);
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
 
-        textViewCurrCity = (TextView) getActivity().findViewById(R.id.textViewCurrCity);
-        textViewUpdated = (TextView) getActivity().findViewById(R.id.textViewUpdated);
-        textViewCurrIcon = (TextView) getActivity().findViewById(R.id.textViewCurrIcon);
-        textViewCurrCondition = (TextView) getActivity().findViewById(R.id.textViewCurrCondition);
-        textViewCurrTemp = (TextView) getActivity().findViewById(R.id.textViewCurrTemp);
-        textViewCurrHumidity = (TextView) getActivity().findViewById(R.id.textViewCurrHumidity);
-        textViewCurrPressure = (TextView) getActivity().findViewById(R.id.textViewCurrPressure);
-        textViewCurrWind = (TextView) getActivity().findViewById(R.id.textViewCurrWind);
-        ImageButton imageButtonRefresh = (ImageButton) getActivity().findViewById(R.id.imageButtonRefresh);
-        ImageButton imageButtonLocation = (ImageButton) getActivity().findViewById(R.id.imageButtonLocation);
-        recyclerViewForecast = (RecyclerView) getActivity().findViewById(R.id.recyclerView);
+        textViewForecastCity = (TextView) getActivity().findViewById(R.id.textViewForecastCity);
+        ImageButton imageButtonRefresh = (ImageButton) getActivity().findViewById(R.id.imageButtonForecastRefresh);
+        ImageButton imageButtonLocation = (ImageButton) getActivity().findViewById(R.id.imageButtonForecastLocation);
+        recyclerViewForecast = (RecyclerView) getActivity().findViewById(R.id.recyclerViewForecast);
         swipeRefreshLayout = (SwipeRefreshLayout) getActivity().findViewById(R.id.swipe_container);
+
+        updateWeatherData(new CityPreference(getActivity()).getCity());
 
         recyclerViewForecast.setHasFixedSize(true);
         recyclerViewForecast.setNestedScrollingEnabled(false);
@@ -116,16 +109,15 @@ public class OverviewFragment extends android.support.v4.app.Fragment implements
             }
         });
 
-        arrayListHr = new ArrayList<>();
+        arrayListDay = new ArrayList<>();
         arrayListIcon = new ArrayList<>();
         arrayListCondition = new ArrayList<>();
-        arrayListTemp = new ArrayList<>();
+        arrayListTempMin = new ArrayList<>();
+        arrayListTempMax = new ArrayList<>();
 
-        recyclerViewAdapter = new HourForecastRecyclerViewAdapter
-                (getActivity(), arrayListHr, arrayListIcon, arrayListCondition, arrayListTemp);
+        recyclerViewAdapter = new DailyForecastRecyclerViewAdapter
+                (getActivity(), arrayListDay, arrayListIcon, arrayListCondition, arrayListTempMin, arrayListTempMax);
         recyclerViewForecast.setAdapter(recyclerViewAdapter);
-
-        textViewCurrIcon.setTypeface(weatherFont);
 
         imageButtonRefresh.setOnClickListener(this);
         imageButtonLocation.setOnClickListener(this);
@@ -141,22 +133,24 @@ public class OverviewFragment extends android.support.v4.app.Fragment implements
         });
 
     }
+    //endregion
 
+/*
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        weatherFont = Typeface.createFromAsset(getActivity().getAssets(), "weather.ttf");
         updateWeatherData(new CityPreference(getActivity()).getCity());
     }
+*/
 
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.imageButtonRefresh:
+            case R.id.imageButtonForecastRefresh:
                 swipeRefreshLayout.setRefreshing(true);
                 updateWeatherData(new CityPreference(getActivity()).getCity());
                 break;
-            case R.id.imageButtonLocation:
+            case R.id.imageButtonForecastLocation:
                 swipeRefreshLayout.setRefreshing(true);
                 try {
                     locationManager.requestLocationUpdates(
@@ -171,19 +165,8 @@ public class OverviewFragment extends android.support.v4.app.Fragment implements
     private void updateWeatherData(final String city) {
         new Thread() {
             public void run() {
-                final JSONObject jsonCurrent = RemoteFetchCurrent.getJSON(getActivity(), city);
-                final JSONObject jsonForecast = RemoteFetchForecast.getJSON(getActivity(), city);
-                if (jsonCurrent == null) {
-                    handler.post(new Runnable() {
-                        public void run() {
-                            Toast.makeText(getActivity(),
-                                    getActivity().getString(R.string.place_not_found) + " " + city,
-                                    Toast.LENGTH_LONG).show();
-                            swipeRefreshLayout.setRefreshing(false);
-                        }
-                    });
-                }
-                if (jsonForecast == null) {
+                final JSONObject jsonForecastDaily = RemoteFetchDailyForecast.getJSON(getActivity(), city);
+                if (jsonForecastDaily == null) {
                     handler.post(new Runnable() {
                         public void run() {
                             Toast.makeText(getActivity(),
@@ -195,7 +178,7 @@ public class OverviewFragment extends android.support.v4.app.Fragment implements
                 } else {
                     handler.post(new Runnable() {
                         public void run() {
-                            renderWeather(jsonCurrent, jsonForecast);
+                            renderWeather(jsonForecastDaily);
                             swipeRefreshLayout.setRefreshing(false);
                         }
                     });
@@ -204,72 +187,36 @@ public class OverviewFragment extends android.support.v4.app.Fragment implements
         }.start();
     }
 
-    private void renderWeather(JSONObject jsonCurrent, JSONObject jsonForecast) {
+    private void renderWeather(JSONObject jsonForecastDaily) {
         try {
-            textViewCurrCity.setText(jsonCurrent.getString("name") + ", " + jsonCurrent.getJSONObject("sys").getString("country"));
 
-            JSONObject detailsCurr = jsonCurrent.getJSONArray("weather").getJSONObject(0);
-            String currCondition = detailsCurr.getString("description").toUpperCase(Locale.getDefault());
-            if (currCondition.equals("SKY IS CLEAR")) {
-                currCondition = "CLEAR SKIES";
-            }
-            textViewCurrCondition.setText(currCondition);
+            JSONObject location = jsonForecastDaily.getJSONObject("city");
 
-            textViewCurrIcon.setText(setWeatherIconCurr(detailsCurr.getInt("id"),
-                    jsonCurrent.getJSONObject("sys").getLong("sunrise") * 1000,
-                    jsonCurrent.getJSONObject("sys").getLong("sunset") * 1000));
+            textViewForecastCity.setText(location.getString("name") + ", " + location.getString("country"));
 
-            JSONObject mainCurr = jsonCurrent.getJSONObject("main");
-            //TODO Set either degrees or farenheight depending on location
-            textViewCurrTemp.setText(getResources().getString(R.string.name_temperature) + " " + String.format("%.2f", mainCurr.getDouble("temp")) + "\u2103");
-            textViewCurrHumidity.setText(getResources().getString(R.string.name_humidity) + " " + mainCurr.getString("humidity") + "%");
-            textViewCurrPressure.setText(getResources().getString(R.string.name_pressure) + " " + mainCurr.getString("pressure") + " hPa");
-            textViewCurrWind.setText(getResources().getString(R.string.name_wind) + " " + jsonCurrent.getJSONObject("wind").getString("speed") + " mph");
-
-            DateFormat df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT);
-            String updatedOn = df.format(new Date(jsonCurrent.getLong("dt") * 1000));
-            textViewUpdated.setText(getResources().getString(R.string.name_updated) + updatedOn);
-
-            arrayListHr.clear();
+            arrayListDay.clear();
             arrayListIcon.clear();
             arrayListCondition.clear();
-            arrayListTemp.clear();
-
-            switch (sharedPreferences.getString("hour_forecast_hours", "1")) {
-                case "0":
-                    max = 3;
-                    break;
-                case "1":
-                    max = 5;
-                    break;
-                case "2":
-                    max = 7;
-                    break;
-                case "3":
-                    max = 9;
-                    break;
-                default:
-                    max = 5;
-                    break;
-            }
+            arrayListTempMin.clear();
+            arrayListTempMax.clear();
 
             DateFormat dfForecastDay = new SimpleDateFormat("EEE", Locale.getDefault());
-            DateFormat dfForecastTime = DateFormat.getTimeInstance(DateFormat.SHORT);
+            DateFormat dfForecast = DateFormat.getDateInstance(DateFormat.MEDIUM);
 
-            for (int i = 0; i < max; i++) {
-                JSONObject mainForecast = jsonForecast.getJSONArray("list").getJSONObject(i).getJSONObject("main");
-                JSONObject detailsForecast = jsonForecast.getJSONArray("list").getJSONObject(i).getJSONArray("weather").getJSONObject(0);
+            for (int i = 0; i < 16; i++) {
+                JSONObject forecast = jsonForecastDaily.getJSONArray("list").getJSONObject(i);
 
-                Date date = new Date(jsonForecast.getJSONArray("list").getJSONObject(i).getLong("dt") * 1000);
-                arrayListHr.add(dfForecastDay.format(date) + " " + dfForecastTime.format(date));
-                arrayListIcon.add(setWeatherIconForecast(detailsForecast.getInt("id")));
-                String conditionForecast = detailsForecast.getString("description").toUpperCase(Locale.getDefault());
+                Date date = new Date(forecast.getLong("dt") * 1000);
+                arrayListDay.add(dfForecastDay.format(date) + " " + dfForecast.format(date));
+                arrayListIcon.add(setWeatherIconForecast(forecast.getJSONArray("weather").getJSONObject(0).getInt("id")));
+                String conditionForecast = forecast.getJSONArray("weather").getJSONObject(0).getString("description").toUpperCase(Locale.getDefault());
                 if (conditionForecast.equals("SKY IS CLEAR")) {
                     conditionForecast = "CLEAR SKIES";
                 }
                 arrayListCondition.add(conditionForecast);
-                //TODO Set either degrees or farenheight depending on location
-                arrayListTemp.add(getResources().getString(R.string.name_temperature) + " " + String.format("%.1f", mainForecast.getDouble("temp")) + "\u2103");
+                //TODO Set either degrees or fahrenheit depending on location
+                arrayListTempMin.add(getResources().getString(R.string.name_temperature_min) + " " + String.format("%.1f", forecast.getJSONObject("temp").getDouble("min")) + "\u2103");
+                arrayListTempMax.add(getResources().getString(R.string.name_temperature_max) + " " + String.format("%.1f", forecast.getJSONObject("temp").getDouble("max")) + "\u2103");
             }
 
             recyclerViewAdapter.notifyDataSetChanged();
@@ -277,43 +224,6 @@ public class OverviewFragment extends android.support.v4.app.Fragment implements
             Log.e("TimmoWeather", "One or more fields not found...");
         }
 
-
-    }
-
-
-    private String setWeatherIconCurr(int actualId, long sunrise, long sunset) {
-        int id = actualId / 100;
-        String icon = "";
-        if (actualId == 800) {
-            long currentTime = new Date().getTime();
-            if (currentTime >= sunrise && currentTime < sunset) {
-                icon = getActivity().getString(R.string.weather_sunny);
-            } else {
-                icon = getActivity().getString(R.string.weather_clear_night);
-            }
-        } else {
-            switch (id) {
-                case 2:
-                    icon = getActivity().getString(R.string.weather_thunder);
-                    break;
-                case 3:
-                    icon = getActivity().getString(R.string.weather_drizzle);
-                    break;
-                case 7:
-                    icon = getActivity().getString(R.string.weather_foggy);
-                    break;
-                case 8:
-                    icon = getActivity().getString(R.string.weather_cloudy);
-                    break;
-                case 6:
-                    icon = getActivity().getString(R.string.weather_snowy);
-                    break;
-                case 5:
-                    icon = getActivity().getString(R.string.weather_rainy);
-                    break;
-            }
-        }
-        return icon;
     }
 
     private String setWeatherIconForecast(int actualId) {
@@ -350,8 +260,8 @@ public class OverviewFragment extends android.support.v4.app.Fragment implements
         updateWeatherData(city);
     }
 
-    // region getSpanCount
     private int getSpanCount() {
+        //String toastMsg;
         int screenSize = getResources().getConfiguration().screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK;
         if (screenSize >= Configuration.SCREENLAYOUT_SIZE_LARGE) {
             return 3;
@@ -359,16 +269,6 @@ public class OverviewFragment extends android.support.v4.app.Fragment implements
             return 2;
         }
     }
-
-    private int getScreenType() {
-        int screenSize = getResources().getConfiguration().screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK;
-        if (screenSize >= Configuration.SCREENLAYOUT_SIZE_LARGE) {
-            return 3;
-        } else {
-            return 2;
-        }
-    }
-    // endregion
 
     private class MyLocationListener implements LocationListener {
 

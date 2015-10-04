@@ -2,6 +2,6 @@
 <resources>
     <array name="navigation_array">
         <item>Overview</item>
-        <item>Forecast</item>
+        <item>16 Day Forecast</item>
     </array>
 </resources>

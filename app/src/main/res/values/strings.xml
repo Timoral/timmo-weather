@@ -6,13 +6,19 @@
     <string name="drawer_open">Open navigation drawer</string>
     <string name="drawer_close">Close navigation drawer</string>
 
+    <!--<string name="banner_ad_unit_id">ca-app-pub-6205053969368684/2695477654</string>-->
+
     <string name="name_city">City</string>
     <string name="name_updated">Last Updated: </string>
     <string name="name_condition">CONDITIONS</string>
-    <string name="name_temperature">Temperature: </string>
-    <string name="name_humidity">Humidity: </string>
-    <string name="name_pressure">Pressure: </string>
+    <string name="name_temperature">Temperature:</string>
+    <string name="name_temperature_min">Temp Min:</string>
+    <string name="name_temperature_max">Temp Max:</string>
+    <string name="name_humidity">Humidity:</string>
+    <string name="name_pressure">Pressure:</string>
+    <string name="name_wind">Wind:</string>
     <string name="name_hr">Hour</string>
+    <string name="name_day">Day</string>
 
     <string name="desc_icon_weather" tools:ignore="UnusedResources">Weather Icon</string>
     <string name="desc_location">Location</string>
@@ -31,7 +37,7 @@
     <string name="weather_thunder">&#xf01e;</string>
     <string name="weather_drizzle">&#xf01c;</string>
 
-    <string name="place_not_found">Sorry, no weather data found.</string>
+    <string name="place_not_found">Sorry, no weather data found for:</string>
     <string name="no_location_detected" tools:ignore="UnusedResources">Could\'nt find location.</string>
 
 </resources>
