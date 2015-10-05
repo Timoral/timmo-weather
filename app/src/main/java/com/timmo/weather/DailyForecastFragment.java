@@ -1,6 +1,8 @@
 package com.timmo.weather;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.location.Address;
@@ -12,12 +14,14 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -61,9 +65,9 @@ public class DailyForecastFragment extends android.support.v4.app.Fragment imple
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_forecast, container, false);
-        int i = getArguments().getInt(ARG_FORECAST);
-        String forecast = getResources().getStringArray(R.array.navigation_array)[i];
-        getActivity().setTitle(forecast);
+//        int i = getArguments().getInt(ARG_FORECAST);
+//        String forecast = getResources().getStringArray(R.array.navigation_array)[i];
+//        getActivity().setTitle(forecast);
         return rootView;
     }
     //endregion
@@ -163,6 +167,35 @@ public class DailyForecastFragment extends android.support.v4.app.Fragment imple
                 break;
         }
     }
+
+    private void showInputDialog() {
+        final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setTitle("Change city");
+
+        @SuppressLint("InflateParams") View view = getActivity().getLayoutInflater().inflate(R.layout.dialog_change_city, null);
+
+        final EditText editTextInput = (EditText) view.findViewById(R.id.editTextInput);
+
+        builder.setView(view);
+        builder.setPositiveButton("Go", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                changeCity(editTextInput.getText().toString());
+                new CityPreference(getActivity()).setCity(editTextInput.getText().toString());
+                swipeRefreshLayout.setRefreshing(true);
+                updateWeatherData(new CityPreference(getActivity()).getCity());
+                dialog.dismiss();
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        builder.show();
+    }
+
 
     private void updateWeatherData(final String city) {
         new Thread() {
@@ -277,26 +310,26 @@ public class DailyForecastFragment extends android.support.v4.app.Fragment imple
         int id = actualId / 100;
         String icon = "";
         if (actualId == 800) {
-            icon = getActivity().getString(R.string.weather_sunny);
+            icon = getActivity().getString(R.string.weather_day_sunny);
         } else {
             switch (id) {
                 case 2:
-                    icon = getActivity().getString(R.string.weather_thunder);
+                    icon = getActivity().getString(R.string.weather_day_thunder);
                     break;
                 case 3:
-                    icon = getActivity().getString(R.string.weather_drizzle);
+                    icon = getActivity().getString(R.string.weather_day_drizzle);
                     break;
                 case 7:
-                    icon = getActivity().getString(R.string.weather_foggy);
+                    icon = getActivity().getString(R.string.weather_day_foggy);
                     break;
                 case 8:
-                    icon = getActivity().getString(R.string.weather_cloudy);
+                    icon = getActivity().getString(R.string.weather_day_cloudy);
                     break;
                 case 6:
-                    icon = getActivity().getString(R.string.weather_snowy);
+                    icon = getActivity().getString(R.string.weather_day_snowy);
                     break;
                 case 5:
-                    icon = getActivity().getString(R.string.weather_rainy);
+                    icon = getActivity().getString(R.string.weather_day_rainy);
                     break;
             }
         }

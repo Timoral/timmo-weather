@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_first_fragment"
+            android:title="@string/title_overview" />
+        <item
+            android:id="@+id/nav_second_fragment"
+            android:title="@string/title_forecast" />
+<!--
+        <item android:title="@string/name_city">
+            <menu>
+                <item
+                    android:id="@+id/nav_change_city"
+                    android:icon="@drawable/ic_action_settings"
+                    android:title="@string/change_city" />
+            </menu>
+        </item>
+        <item android:title="">
+            <menu>
+                <item
+                    android:id="@+id/nav_rate"
+                    android:icon="@drawable/ic_action_grade"
+                    android:title="@string/action_rate" />
+                <item
+                    android:id="@+id/nav_more"
+                    android:icon="@drawable/ic_action_more"
+                    android:title="@string/action_more" />
+                <item
+                    android:id="@+id/nav_settings"
+                    android:icon="@drawable/ic_action_settings"
+                    android:title="@string/title_activity_settings" />
+            </menu>
+        </item>
+-->
+    </group>
+</menu>

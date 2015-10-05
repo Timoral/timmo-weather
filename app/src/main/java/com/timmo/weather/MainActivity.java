@@ -7,24 +7,28 @@ import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.design.widget.NavigationView;
+import android.support.v4.app.Fragment;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
 
 public class MainActivity extends AppCompatActivity {
 
-    private DrawerLayout mDrawerLayout;
+    private DrawerLayout drawerLayout;
     private ListView mDrawerList;
-    private ActionBarDrawerToggle mDrawerToggle;
+    private ActionBarDrawerToggle drawerToggle;
+    private Toolbar toolbar;
+    private NavigationView navigationViewDrawer;
 
     private CharSequence mDrawerTitle;
     private CharSequence mTitle;
@@ -49,23 +53,57 @@ public class MainActivity extends AppCompatActivity {
         mTitle = mDrawerTitle = getTitle();
         mTitles = getResources().getStringArray(R.array.navigation_array);
 
-        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        mDrawerList = (ListView) findViewById(R.id.left_drawer_list);
+        drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        //mDrawerList = (ListView) findViewById(R.id.left_drawer_list);
 
-        mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
+        navigationViewDrawer = (NavigationView) findViewById(R.id.nvView);
+        setupDrawerContent(navigationViewDrawer);
 
-        mDrawerList.setAdapter(new ArrayAdapter<>
-                (this, R.layout.drawer_list_item, mTitles));
+/*
+        drawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
+
+        mDrawerList.setAdapter(new ArrayAdapter<>(this, R.layout.drawer_list_item, mTitles));
         mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
+*/
 
-        // enable ActionBar app icon to behave as action to toggle nav drawer
+
+/*
+        final ActionBar ab = getSupportActionBar();
+        if (ab != null) {
+            //ab.setHomeAsUpIndicator(R.drawable.ic_menu);
+            ab.setDisplayHomeAsUpEnabled(true);
+        }
+*/
+
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
         //noinspection ConstantConditions
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
 
+
+        drawerToggle = setupDrawerToggle();
+
+        drawerLayout.setDrawerListener(drawerToggle);
+
+
+        switch (sharedPreferences.getString("starting_page", "0")) {
+            case "0":
+                selectDrawerItem(navigationViewDrawer.getMenu().getItem(0).setChecked(true));
+                break;
+            case "1":
+                selectDrawerItem(navigationViewDrawer.getMenu().getItem(1).setChecked(true));
+                break;
+            default:
+                selectDrawerItem(navigationViewDrawer.getMenu().getItem(0).setChecked(true));
+                break;
+        }
+
+
         // ActionBarDrawerToggle ties together the the proper interactions
         // between the sliding drawer and the action bar app icon
-        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.string.drawer_open, R.string.drawer_close) {
+/*
+        drawerToggle = new ActionBarDrawerToggle(this, drawerLayout, R.string.drawer_open, R.string.drawer_close) {
             public void onDrawerClosed(View view) {
                 getSupportActionBar().setTitle(mTitle);
                 invalidateOptionsMenu();
@@ -76,7 +114,7 @@ public class MainActivity extends AppCompatActivity {
                 invalidateOptionsMenu();
             }
         };
-        mDrawerLayout.setDrawerListener(mDrawerToggle);
+        drawerLayout.setDrawerListener(drawerToggle);
 
         if (savedInstanceState == null) {
             switch (sharedPreferences.getString("starting_page", "0")) {
@@ -91,6 +129,108 @@ public class MainActivity extends AppCompatActivity {
                     break;
             }
         }
+*/
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (drawerToggle.onOptionsItemSelected(item)) {
+            return true;
+        }
+        // The action bar home/up action should open or close the drawer.
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                drawerLayout.openDrawer(GravityCompat.START);
+                return true;
+            case R.id.action_settings:
+                startActivity(new Intent(MainActivity.this, SettingsActivity.class));
+                finish();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
+    protected void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        // Sync the toggle state after onRestoreInstanceState has occurred.
+        drawerToggle.syncState();
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        // Pass any configuration change to the drawer toggles
+        drawerToggle.onConfigurationChanged(newConfig);
+    }
+    private ActionBarDrawerToggle setupDrawerToggle() {
+        return new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.drawer_open,  R.string.drawer_close);
+    }
+
+    private void setupDrawerContent(NavigationView navigationView) {
+        navigationView.setNavigationItemSelectedListener(
+                new NavigationView.OnNavigationItemSelectedListener() {
+                    @Override
+                    public boolean onNavigationItemSelected(MenuItem menuItem) {
+                        selectDrawerItem(menuItem);
+                        return true;
+                    }
+                });
+    }
+
+    public void selectDrawerItem(MenuItem menuItem) {
+        // Create a new fragment and specify the planet to show based on
+        // position
+        Fragment fragment = null;
+        Class fragmentClass;
+        switch(menuItem.getItemId()) {
+            case R.id.nav_first_fragment:
+                fragmentClass = OverviewFragment.class;
+                break;
+            case R.id.nav_second_fragment:
+                fragmentClass = DailyForecastFragment.class;
+
+                break;
+/*
+            case R.id.nav_change_city:
+                showInputDialog();
+                break;
+            case R.id.nav_rate:
+//TODO
+                break;
+            case R.id.nav_more:
+
+                break;
+            case R.id.nav_settings:
+                startActivity(new Intent(MainActivity.this, SettingsActivity.class));
+                finish();
+                break;
+*/
+            default:
+                fragmentClass = OverviewFragment.class;
+        }
+
+        try {
+            fragment = (Fragment) fragmentClass.newInstance();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // Insert the fragment by replacing any existing fragment
+        android.support.v4.app.FragmentManager fragmentManager = getSupportFragmentManager();
+        fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
+
+        // Highlight the selected item, update the title, and close the drawer
+        menuItem.setChecked(true);
+        setTitle(menuItem.getTitle());
+        drawerLayout.closeDrawers();
     }
 
     private void showInputDialog() {
@@ -125,24 +265,18 @@ public class MainActivity extends AppCompatActivity {
         new CityPreference(this).setCity(city);
     }
 
+
+/*
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
 
-    @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        // If the nav drawer is open, hide action items related to the content view
-        boolean drawerOpen = mDrawerLayout.isDrawerOpen(mDrawerList);
-        menu.findItem(R.id.action_settings).setVisible(!drawerOpen);
-        menu.findItem(R.id.action_change_city).setVisible(!drawerOpen);
-        return super.onPrepareOptionsMenu(menu);
-    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (mDrawerToggle.onOptionsItemSelected(item)) {
+        if (drawerToggle.onOptionsItemSelected(item)) {
             return true;
         }
         switch (item.getItemId()) {
@@ -157,7 +291,9 @@ public class MainActivity extends AppCompatActivity {
                 return super.onOptionsItemSelected(item);
         }
     }
+*/
 
+/*
     private void selectItem(int position) {
         // update the main content by replacing fragments
         android.support.v4.app.FragmentManager fragmentManager = getSupportFragmentManager();
@@ -185,7 +321,7 @@ public class MainActivity extends AppCompatActivity {
         // update selected item and title, then close the drawer
         mDrawerList.setItemChecked(position, true);
         setTitle(mTitles[position]);
-        mDrawerLayout.closeDrawer(mDrawerList);
+        drawerLayout.closeDrawer(mDrawerList);
     }
 
     @Override
@@ -199,14 +335,14 @@ public class MainActivity extends AppCompatActivity {
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
         // Sync the toggle state after onRestoreInstanceState has occurred.
-        mDrawerToggle.syncState();
+        drawerToggle.syncState();
     }
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         // Pass any configuration change to the drawer toggle
-        mDrawerToggle.onConfigurationChanged(newConfig);
+        drawerToggle.onConfigurationChanged(newConfig);
     }
 
     private class DrawerItemClickListener implements ListView.OnItemClickListener {
@@ -215,4 +351,5 @@ public class MainActivity extends AppCompatActivity {
             selectItem(position);
         }
     }
+*/
 }

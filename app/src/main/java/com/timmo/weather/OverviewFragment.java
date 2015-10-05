@@ -1,6 +1,8 @@
 package com.timmo.weather;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Typeface;
@@ -13,12 +15,14 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -64,9 +68,9 @@ public class OverviewFragment extends android.support.v4.app.Fragment implements
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_overview, container, false);
-        int i = getArguments().getInt(ARG_OVERVIEW);
-        String notes = getResources().getStringArray(R.array.navigation_array)[i];
-        getActivity().setTitle(notes);
+//        int i = getArguments().getInt(ARG_OVERVIEW);
+//        String notes = getResources().getStringArray(R.array.navigation_array)[i];
+//        getActivity().setTitle(notes);
         return rootView;
     }
 
@@ -84,6 +88,7 @@ public class OverviewFragment extends android.support.v4.app.Fragment implements
         textViewCurrHumidity = (TextView) getActivity().findViewById(R.id.textViewCurrHumidity);
         textViewCurrPressure = (TextView) getActivity().findViewById(R.id.textViewCurrPressure);
         textViewCurrWind = (TextView) getActivity().findViewById(R.id.textViewCurrWind);
+        ImageButton imageButtonChangeCity = (ImageButton) getActivity().findViewById(R.id.imageButtonChangeCity);
         ImageButton imageButtonRefresh = (ImageButton) getActivity().findViewById(R.id.imageButtonRefresh);
         ImageButton imageButtonLocation = (ImageButton) getActivity().findViewById(R.id.imageButtonLocation);
         recyclerViewForecast = (RecyclerView) getActivity().findViewById(R.id.recyclerView);
@@ -129,6 +134,7 @@ public class OverviewFragment extends android.support.v4.app.Fragment implements
 
         textViewCurrIcon.setTypeface(weatherFont);
 
+        imageButtonChangeCity.setOnClickListener(this);
         imageButtonRefresh.setOnClickListener(this);
         imageButtonLocation.setOnClickListener(this);
 
@@ -154,6 +160,9 @@ public class OverviewFragment extends android.support.v4.app.Fragment implements
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
+            case R.id.imageButtonChangeCity:
+                showInputDialog();
+                break;
             case R.id.imageButtonRefresh:
                 swipeRefreshLayout.setRefreshing(true);
                 updateWeatherData(new CityPreference(getActivity()).getCity());
@@ -169,6 +178,35 @@ public class OverviewFragment extends android.support.v4.app.Fragment implements
                 break;
         }
     }
+
+    private void showInputDialog() {
+        final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setTitle("Change city");
+
+        @SuppressLint("InflateParams") View view = getActivity().getLayoutInflater().inflate(R.layout.dialog_change_city, null);
+
+        final EditText editTextInput = (EditText) view.findViewById(R.id.editTextInput);
+
+        builder.setView(view);
+        builder.setPositiveButton("Go", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                changeCity(editTextInput.getText().toString());
+                new CityPreference(getActivity()).setCity(editTextInput.getText().toString());
+                swipeRefreshLayout.setRefreshing(true);
+                updateWeatherData(new CityPreference(getActivity()).getCity());
+                dialog.dismiss();
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        builder.show();
+    }
+
 
     private void updateWeatherData(final String city) {
         new Thread() {
@@ -236,7 +274,8 @@ public class OverviewFragment extends android.support.v4.app.Fragment implements
 
             textViewCurrIcon.setText(setWeatherIcon(detailsCurr.getInt("id"),
                     jsonCurrent.getJSONObject("sys").getLong("sunrise") * 1000,
-                    jsonCurrent.getJSONObject("sys").getLong("sunset") * 1000));
+                    jsonCurrent.getJSONObject("sys").getLong("sunset") * 1000,
+                    new Date().getTime()));
 
             JSONObject mainCurr = jsonCurrent.getJSONObject("main");
 
@@ -312,7 +351,8 @@ public class OverviewFragment extends android.support.v4.app.Fragment implements
                 arrayListHr.add(dfForecastDay.format(date) + " " + dfForecastTime.format(date));
                 arrayListIcon.add(setWeatherIcon(detailsForecast.getInt("id"),
                         jsonCurrent.getJSONObject("sys").getLong("sunrise") * 1000,
-                        jsonCurrent.getJSONObject("sys").getLong("sunset") * 1000));
+                        jsonCurrent.getJSONObject("sys").getLong("sunset") * 1000,
+                        jsonForecast.getJSONArray("list").getJSONObject(i).getLong("dt") * 1000));
                 String conditionForecast = detailsForecast.getString("description").toUpperCase(Locale.getDefault());
                 if (conditionForecast.equals("SKY IS CLEAR")) {
                     conditionForecast = "CLEAR SKIES";
@@ -368,36 +408,60 @@ public class OverviewFragment extends android.support.v4.app.Fragment implements
         return bd.doubleValue();
     }
 
-    private String setWeatherIcon(int actualId, long sunrise, long sunset) {
+    private String setWeatherIcon(int actualId, long sunrise, long sunset, long time) {
         int id = actualId / 100;
         String icon = "";
-        if (actualId == 800) {
-            long currentTime = new Date().getTime();
-            if (currentTime >= sunrise && currentTime < sunset) {
-                icon = getActivity().getString(R.string.weather_sunny);
-            } else {
-                icon = getActivity().getString(R.string.weather_clear_night);
+        DateFormat dfTime = DateFormat.getTimeInstance(DateFormat.SHORT);
+
+        //TODO find way to use sunrise and sunset for the next day instead of always being past sunset after dusk...
+        if (time >= sunrise && time < sunset) {
+            if (actualId == 800) {
+                icon = getActivity().getString(R.string.weather_day_sunny);
             }
-        } else {
             switch (id) {
                 case 2:
-                    icon = getActivity().getString(R.string.weather_thunder);
+                    icon = getActivity().getString(R.string.weather_day_thunder);
                     break;
                 case 3:
-                    icon = getActivity().getString(R.string.weather_drizzle);
+                    icon = getActivity().getString(R.string.weather_day_drizzle);
                     break;
                 case 7:
-                    icon = getActivity().getString(R.string.weather_foggy);
+                    icon = getActivity().getString(R.string.weather_day_foggy);
                     break;
                 case 8:
-                    icon = getActivity().getString(R.string.weather_cloudy);
+                    icon = getActivity().getString(R.string.weather_day_cloudy);
                     break;
                 case 6:
-                    icon = getActivity().getString(R.string.weather_snowy);
+                    icon = getActivity().getString(R.string.weather_day_snowy);
                     break;
                 case 5:
-                    icon = getActivity().getString(R.string.weather_rainy);
+                    icon = getActivity().getString(R.string.weather_day_rainy);
                     break;
+            }
+        } else {
+            if (actualId == 800) {
+                icon = getActivity().getString(R.string.weather_night_clear);
+            } else {
+                switch (id) {
+                    case 2:
+                        icon = getActivity().getString(R.string.weather_night_thunder);
+                        break;
+                    case 3:
+                        icon = getActivity().getString(R.string.weather_night_drizzle);
+                        break;
+                    case 7:
+                        icon = getActivity().getString(R.string.weather_night_foggy);
+                        break;
+                    case 8:
+                        icon = getActivity().getString(R.string.weather_night_cloudy);
+                        break;
+                    case 6:
+                        icon = getActivity().getString(R.string.weather_night_snowy);
+                        break;
+                    case 5:
+                        icon = getActivity().getString(R.string.weather_night_rainy);
+                        break;
+                }
             }
         }
         return icon;

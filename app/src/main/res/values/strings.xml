@@ -1,14 +1,16 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">Timmo Weather</string>
+    <string name="title_overview">Overview</string>
+    <string name="title_forecast">16 Day Forecast</string>
     <string name="action_settings">Settings</string>
-    <string name="action_rate" tools:ignore="UnusedResources">Rate</string>
+    <string name="action_rate">Rate</string>
     <string name="action_more">More Apps</string>
     <string name="drawer_open">Open navigation drawer</string>
     <string name="drawer_close">Close navigation drawer</string>
 
     <string name="name_city">City</string>
     <string name="name_updated">Last Updated: </string>
-    <string name="name_condition">CONDITIONS</string>
+    <string name="name_condition">CONDITION</string>
     <string name="name_temperature">Temperature:</string>
     <string name="name_temperature_min">Temp Min:</string>
     <string name="name_temperature_max">Temp Max:</string>
@@ -27,15 +29,21 @@
     <string name="change_city">Change city</string>
     <string name="open_weather_map_app_id">efb7b9888b0708746bd71d6251ef709c</string>
 
-    <string name="weather_sunny">&#xf00d;</string>
-    <string name="weather_clear_night">&#xf02e;</string>
+    <string name="weather_day_sunny">&#xf00d;</string>
+    <string name="weather_day_foggy">&#xf014;</string>
+    <string name="weather_day_cloudy">&#xf013;</string>
+    <string name="weather_day_rainy">&#xf019;</string>
+    <string name="weather_day_snowy">&#xf01b;</string>
+    <string name="weather_day_thunder">&#xf01e;</string>
+    <string name="weather_day_drizzle">&#xf00b;</string>
 
-    <string name="weather_foggy">&#xf014;</string>
-    <string name="weather_cloudy">&#xf013;</string>
-    <string name="weather_rainy">&#xf019;</string>
-    <string name="weather_snowy">&#xf01b;</string>
-    <string name="weather_thunder">&#xf01e;</string>
-    <string name="weather_drizzle">&#xf01c;</string>
+    <string name="weather_night_clear">&#xf02e;</string>
+    <string name="weather_night_foggy">&#xf04a;</string>
+    <string name="weather_night_cloudy">&#xf086;</string>
+    <string name="weather_night_rainy">&#xf028;</string>
+    <string name="weather_night_snowy">&#xf02a;</string>
+    <string name="weather_night_thunder">&#xf03b;</string>
+    <string name="weather_night_drizzle">&#xf02b;</string>
 
     <string name="place_not_found">Sorry, no weather data found for:</string>
     <string name="no_location_detected" tools:ignore="UnusedResources">Could\'nt find location.</string>

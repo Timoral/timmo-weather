@@ -24,9 +24,9 @@ public class SettingsActivity extends PreferenceActivity {
     protected void onCreate(Bundle savedInstanceState) {
         final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
         if (sharedPreferences.getBoolean("dark_theme", false)) {
-            setTheme(R.style.AppThemeDark);
+            setTheme(R.style.SettingsThemeDark);
         } else {
-            setTheme(R.style.AppTheme);
+            setTheme(R.style.SettingsTheme);
         }
         super.onCreate(savedInstanceState);
         addPreferencesFromResource(R.xml.settings);
@@ -53,6 +53,7 @@ public class SettingsActivity extends PreferenceActivity {
 
     }
 
+/*
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
@@ -60,7 +61,7 @@ public class SettingsActivity extends PreferenceActivity {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
             LinearLayout root = (LinearLayout) findViewById(android.R.id.list).getParent().getParent().getParent();
-            toolbar = (Toolbar) LayoutInflater.from(this).inflate(R.layout.settings_toolbar, root, false);
+            toolbar = (Toolbar) LayoutInflater.from(this).inflate(R.layout.toolbar, root, false);
             root.addView(toolbar, 0); // insert at top
         } else {
             ViewGroup root = (ViewGroup) findViewById(android.R.id.content);
@@ -68,8 +69,7 @@ public class SettingsActivity extends PreferenceActivity {
 
             root.removeAllViews();
 
-            toolbar = (Toolbar) LayoutInflater.from(this).inflate(R.layout.settings_toolbar, root, false);
-
+            toolbar = (Toolbar) LayoutInflater.from(this).inflate(R.layout.toolbar, root, false);
 
             int height;
             TypedValue tv = new TypedValue();
@@ -94,6 +94,7 @@ public class SettingsActivity extends PreferenceActivity {
 
         toolbar.setTitleTextColor(Color.WHITE);
     }
+*/
 
     @Override
     public void onBackPressed() {

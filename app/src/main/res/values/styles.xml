@@ -2,7 +2,7 @@
 
     <attr name="cardStyle" format="reference" />
 
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar" tools:ignore="NewApi">
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar" tools:ignore="NewApi">
         <item name="colorPrimary">@color/grey_900</item>
         <item name="colorAccent">@color/grey_500</item>
         <item name="android:buttonStyle">@style/buttonStyle</item>
@@ -15,9 +15,11 @@
         <!-- enable overlapping of exiting and entering activities-->
         <item name="android:windowAllowEnterTransitionOverlap">true</item>
         <item name="android:windowAllowReturnTransitionOverlap">true</item>
+
+        <item name="android:windowTranslucentStatus">true</item>
     </style>
 
-    <style name="AppThemeDark" parent="Theme.AppCompat" tools:ignore="NewApi">
+    <style name="AppThemeDark" parent="Theme.AppCompat.NoActionBar" tools:ignore="NewApi">
         <item name="colorPrimary">@color/grey_900</item>
         <item name="colorAccent">@color/grey_500</item>
         <item name="android:buttonStyle">@style/buttonStyle</item>
@@ -33,6 +35,8 @@
 
         <item name="android:windowEnterTransition">@transition/transition_fade</item>
         <item name="android:windowExitTransition">@transition/transition_fade</item>
+
+        <item name="android:windowTranslucentStatus">true</item>
     </style>
 
     <style name="CardView.Light" parent="CardView">
@@ -61,5 +65,15 @@
     <style name="buttonStyle" parent="AppTheme">
         <item name="android:textColor">@color/grey_500</item>
         <item name="android:textAppearance">?android:attr/borderlessButtonStyle</item>
+    </style>
+
+    <style name="SettingsTheme" parent="Theme.AppCompat.Light" tools:ignore="NewApi">
+        <item name="colorPrimary">@color/grey_900</item>
+        <item name="colorAccent">@color/grey_500</item>
+    </style>
+
+    <style name="SettingsThemeDark" parent="Theme.AppCompat" tools:ignore="NewApi">
+        <item name="colorPrimary">@color/grey_900</item>
+        <item name="colorAccent">@color/grey_500</item>
     </style>
 </resources>
