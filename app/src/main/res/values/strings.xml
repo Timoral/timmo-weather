@@ -20,13 +20,14 @@
     <string name="name_hr">Hour</string>
     <string name="name_day">Day</string>
 
-    <string name="hint_city">Type your city</string>
+    <string name="hint_city">Type your city (E.G. London)</string>
 
     <string name="desc_icon_weather" tools:ignore="UnusedResources">Weather Icon</string>
     <string name="desc_location">Location</string>
     <string name="desc_refresh">Refresh</string>
 
     <string name="change_city">Change city</string>
+    <string name="go">GO</string>
     <string name="open_weather_map_app_id">efb7b9888b0708746bd71d6251ef709c</string>
 
     <string name="weather_day_sunny">&#xf00d;</string>
@@ -47,5 +48,9 @@
 
     <string name="place_not_found">Sorry, no weather data found for:</string>
     <string name="no_location_detected" tools:ignore="UnusedResources">Could\'nt find location.</string>
+    <string name="use_gps">Use GPS</string>
+    <string name="welcome_message">This appears to be the first time you have used Timmo Weather.\nPlease type your city into the text box below or use GPS to automatically find your location.</string>
+    <string name="welcome_sub_message">Please note that GPS will work best in when the device is outside and in daylight.</string>
+    <string name="welcome_notice">You can change city later by clicking on either the GPS or city icon shown below:</string>
 
 </resources>

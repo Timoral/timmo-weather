@@ -43,7 +43,6 @@ public class DailyForecastFragment extends android.support.v4.app.Fragment imple
 
 
     // region Global Vars
-    public static final String ARG_FORECAST = "FORECAST";
     private final Handler handler;
     private LocationManager locationManager;
     private LocationListener locationListener;
@@ -60,17 +59,27 @@ public class DailyForecastFragment extends android.support.v4.app.Fragment imple
         handler = new Handler();
     }
 
-    // region onCreateView
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_forecast, container, false);
-//        int i = getArguments().getInt(ARG_FORECAST);
-//        String forecast = getResources().getStringArray(R.array.navigation_array)[i];
-//        getActivity().setTitle(forecast);
-        return rootView;
+    private static double round(double value) {
+        BigDecimal bd = new BigDecimal(value);
+        bd = bd.setScale(2, RoundingMode.HALF_UP);
+        return bd.doubleValue();
     }
     //endregion
+
+    // region onCreateView
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_forecast, container, false);
+    }
+    //endregion
+
+/*
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        updateWeatherData(new CityPreference(getActivity()).getCity());
+    }
+*/
 
     //region onViewCreated
     @Override
@@ -93,10 +102,6 @@ public class DailyForecastFragment extends android.support.v4.app.Fragment imple
         recyclerViewForecast.setLayoutManager(gridLayoutManager);
 
         recyclerViewForecast.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-                super.onScrollStateChanged(recyclerView, newState);
-            }
 
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
@@ -139,19 +144,13 @@ public class DailyForecastFragment extends android.support.v4.app.Fragment imple
         });
 
     }
-    //endregion
-
-/*
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        updateWeatherData(new CityPreference(getActivity()).getCity());
-    }
-*/
 
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
+            case R.id.imageButtonChangeCity:
+                showInputDialog();
+                break;
             case R.id.imageButtonForecastRefresh:
                 swipeRefreshLayout.setRefreshing(true);
                 updateWeatherData(new CityPreference(getActivity()).getCity());
@@ -195,7 +194,6 @@ public class DailyForecastFragment extends android.support.v4.app.Fragment imple
         });
         builder.show();
     }
-
 
     private void updateWeatherData(final String city) {
         new Thread() {
@@ -295,15 +293,7 @@ public class DailyForecastFragment extends android.support.v4.app.Fragment imple
     }
 
     private Double convertToKPH(Double miles) {
-        return round(miles * 1.609344, 2);
-    }
-
-    public static double round(double value, int places) {
-        if (places < 0) throw new IllegalArgumentException();
-
-        BigDecimal bd = new BigDecimal(value);
-        bd = bd.setScale(places, RoundingMode.HALF_UP);
-        return bd.doubleValue();
+        return round(miles * 1.609344);
     }
 
     private String setWeatherIcon(int actualId) {
@@ -336,7 +326,7 @@ public class DailyForecastFragment extends android.support.v4.app.Fragment imple
         return icon;
     }
 
-    public void changeCity(String city) {
+    private void changeCity(String city) {
         updateWeatherData(city);
     }
 

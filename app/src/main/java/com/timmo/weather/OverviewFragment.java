@@ -1,6 +1,7 @@
 package com.timmo.weather;
 
 import android.annotation.SuppressLint;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
@@ -22,6 +23,9 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -44,7 +48,6 @@ public class OverviewFragment extends android.support.v4.app.Fragment implements
 
 
     // region Global Vars
-    public static final String ARG_OVERVIEW = "OVERVIEW";
     private final Handler handler;
     private Typeface weatherFont;
     private LocationManager locationManager;
@@ -57,21 +60,25 @@ public class OverviewFragment extends android.support.v4.app.Fragment implements
     private SwipeRefreshLayout swipeRefreshLayout;
     private RecyclerView recyclerViewForecast;
     private GridLayoutManager gridLayoutManager;
+    private boolean goodCity;
+    private Dialog dialogFirstRun;
     //endregion
 
     public OverviewFragment() {
         handler = new Handler();
     }
 
+    private static double round(double value) {
+        BigDecimal bd = new BigDecimal(value);
+        bd = bd.setScale(2, RoundingMode.HALF_UP);
+        return bd.doubleValue();
+    }
+
     // region onCreateView
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_overview, container, false);
-//        int i = getArguments().getInt(ARG_OVERVIEW);
-//        String notes = getResources().getStringArray(R.array.navigation_array)[i];
-//        getActivity().setTitle(notes);
-        return rootView;
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        goodCity = false;
+        return inflater.inflate(R.layout.fragment_overview, container, false);
     }
 
     //region onViewCreated
@@ -101,10 +108,6 @@ public class OverviewFragment extends android.support.v4.app.Fragment implements
         recyclerViewForecast.setLayoutManager(gridLayoutManager);
 
         recyclerViewForecast.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-                super.onScrollStateChanged(recyclerView, newState);
-            }
 
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
@@ -148,6 +151,10 @@ public class OverviewFragment extends android.support.v4.app.Fragment implements
             }
         });
 
+
+        if (sharedPreferences.getBoolean("first_run", true)) {
+            FirstRunDialog();
+        }
     }
 
     @Override
@@ -179,78 +186,137 @@ public class OverviewFragment extends android.support.v4.app.Fragment implements
         }
     }
 
+    private void FirstRunDialog() {
+        goodCity = false;
+
+        dialogFirstRun = new Dialog(getActivity());
+        dialogFirstRun.setContentView(R.layout.dialog_first_run);
+        dialogFirstRun.setCancelable(false);
+        dialogFirstRun.setTitle("First Run");
+
+        final CheckBox checkBoxGPS = (CheckBox) dialogFirstRun.findViewById(R.id.checkBoxGPS);
+        final EditText editTextInput = (EditText) dialogFirstRun.findViewById(R.id.editTextInput);
+        Button buttonGo = (Button) dialogFirstRun.findViewById(R.id.buttonGo);
+
+        checkBoxGPS.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (buttonView.isChecked()) {
+                    editTextInput.setEnabled(false);
+                } else {
+                    editTextInput.setEnabled(true);
+                }
+            }
+        });
+
+        // if button is clicked, close the custom dialogFirstRun
+        buttonGo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (checkBoxGPS.isChecked()) {
+                    swipeRefreshLayout.setRefreshing(true);
+                    try {
+                        locationManager.requestLocationUpdates(
+                                LocationManager.GPS_PROVIDER, 5000, 100, locationListener);
+                        dialogFirstRun.dismiss();
+                        sharedPreferences.edit().putBoolean("first_run", false).apply();
+                    } catch (SecurityException e) {
+                        Log.e("TimmoWeather", "SecurityException: Permission requirements not met.");
+                    }
+                } else {
+                    String text = editTextInput.getText().toString();
+                    if (!text.equals("")) {
+                        changeCity(text);
+                        if (goodCity) {
+                            dialogFirstRun.dismiss();
+                            sharedPreferences.edit().putBoolean("first_run", false).apply();
+                        }
+                    } else {
+                        goodCity = false;
+                        Toast.makeText(getActivity(), "Please Type something...", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }
+        });
+        dialogFirstRun.show();
+    }
+
     private void showInputDialog() {
-        final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setTitle("Change city");
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity());
+        alertDialogBuilder.setTitle("Change city");
 
         @SuppressLint("InflateParams") View view = getActivity().getLayoutInflater().inflate(R.layout.dialog_change_city, null);
 
         final EditText editTextInput = (EditText) view.findViewById(R.id.editTextInput);
+        final CheckBox checkboxGPS = (CheckBox) view.findViewById(R.id.checkboxGPS);
 
-        builder.setView(view);
-        builder.setPositiveButton("Go", new DialogInterface.OnClickListener() {
+        checkboxGPS.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (buttonView.isChecked()) {
+                    editTextInput.setEnabled(false);
+                } else {
+                    editTextInput.setEnabled(true);
+                }
+            }
+        });
+
+        alertDialogBuilder.setView(view);
+        alertDialogBuilder.setPositiveButton("Go", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                changeCity(editTextInput.getText().toString());
-                new CityPreference(getActivity()).setCity(editTextInput.getText().toString());
-                swipeRefreshLayout.setRefreshing(true);
-                updateWeatherData(new CityPreference(getActivity()).getCity());
+                if (checkboxGPS.isChecked()) {
+                    swipeRefreshLayout.setRefreshing(true);
+                    try {
+                        locationManager.requestLocationUpdates(
+                                LocationManager.GPS_PROVIDER, 5000, 100, locationListener);
+                    } catch (SecurityException e) {
+                        Log.e("TimmoWeather", "SecurityException: Permission requirements not met.");
+                    }
+                } else {
+                    changeCity(editTextInput.getText().toString());
+                    swipeRefreshLayout.setRefreshing(true);
+                }
                 dialog.dismiss();
             }
         });
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+        alertDialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
             }
         });
-        builder.show();
+        alertDialogBuilder.show();
     }
 
+    private void changeCity(String city) {
+        updateWeatherData(city);
+        if (goodCity) {
+            new CityPreference(getActivity()).setCity(city);
+        }
+    }
 
     private void updateWeatherData(final String city) {
         new Thread() {
             public void run() {
                 final JSONObject jsonCurrent = RemoteFetchOWMCurrent.getJSON(getActivity(), city);
                 final JSONObject jsonForecast = RemoteFetchOWMForecast.getJSON(getActivity(), city);
-/*
-                switch (sharedPreferences.getString("source", "0")) {
-                    case "0":
-                        jsonCurrent = RemoteFetchOWMCurrent.getJSON(getActivity(), city);
-                        jsonForecast = RemoteFetchOWMForecast.getJSON(getActivity(), city);
-                        break;
-                    case "1":
-                        jsonCurrent = RemoteFetchYahooCurrent.getJSON(getActivity(), city);
-                        jsonForecast = RemoteFetchOWMForecast.getJSON(getActivity(), city);
-                        break;
-                    default:
-                        jsonCurrent = RemoteFetchOWMCurrent.getJSON(getActivity(), city);
-                        jsonForecast = RemoteFetchOWMForecast.getJSON(getActivity(), city);
-                        break;
-                }
-*/
-                if (jsonCurrent == null) {
+
+                if (jsonCurrent == null || jsonForecast == null) {
                     handler.post(new Runnable() {
                         public void run() {
                             Toast.makeText(getActivity(),
                                     getActivity().getString(R.string.place_not_found) + " " + city,
                                     Toast.LENGTH_LONG).show();
+                            goodCity = false;
                             swipeRefreshLayout.setRefreshing(false);
-                        }
-                    });
-                }
-                if (jsonForecast == null) {
-                    handler.post(new Runnable() {
-                        public void run() {
-                            Toast.makeText(getActivity(),
-                                    getActivity().getString(R.string.place_not_found) + " " + city,
-                                    Toast.LENGTH_LONG).show();
-                            swipeRefreshLayout.setRefreshing(false);
+                            dialogFirstRun.show();
                         }
                     });
                 } else {
                     handler.post(new Runnable() {
                         public void run() {
+                            goodCity = true;
                             renderWeather(jsonCurrent, jsonForecast);
                             swipeRefreshLayout.setRefreshing(false);
                         }
@@ -388,8 +454,6 @@ public class OverviewFragment extends android.support.v4.app.Fragment implements
         } catch (JSONException e) {
             Log.e("TimmoWeather", "One or more fields not found...");
         }
-
-
     }
 
     private Double convertToFahrenheit(Double celsius) {
@@ -397,48 +461,46 @@ public class OverviewFragment extends android.support.v4.app.Fragment implements
     }
 
     private Double convertToKPH(Double miles) {
-        return round(miles * 1.609344, 2);
+        return round(miles * 1.609344);
     }
 
-    public static double round(double value, int places) {
-        if (places < 0) throw new IllegalArgumentException();
-
-        BigDecimal bd = new BigDecimal(value);
-        bd = bd.setScale(places, RoundingMode.HALF_UP);
-        return bd.doubleValue();
-    }
-
+    @SuppressWarnings("deprecation")
     private String setWeatherIcon(int actualId, long sunrise, long sunset, long time) {
         int id = actualId / 100;
         String icon = "";
-        DateFormat dfTime = DateFormat.getTimeInstance(DateFormat.SHORT);
 
-        //TODO find way to use sunrise and sunset for the next day instead of always being past sunset after dusk...
-        if (time >= sunrise && time < sunset) {
+        long sunriseTime = new Date(sunrise).getHours();
+        long sunsetTime = new Date(sunset).getHours();
+        long timeNow = new Date(time).getHours();
+
+        if (timeNow >= sunriseTime && timeNow < sunsetTime) {
+            //Toast.makeText(getActivity(), sunriseTime + "\n" + timeNow + "\n" + sunsetTime+ "\n" + "DAY", Toast.LENGTH_LONG).show();
             if (actualId == 800) {
                 icon = getActivity().getString(R.string.weather_day_sunny);
-            }
-            switch (id) {
-                case 2:
-                    icon = getActivity().getString(R.string.weather_day_thunder);
-                    break;
-                case 3:
-                    icon = getActivity().getString(R.string.weather_day_drizzle);
-                    break;
-                case 7:
-                    icon = getActivity().getString(R.string.weather_day_foggy);
-                    break;
-                case 8:
-                    icon = getActivity().getString(R.string.weather_day_cloudy);
-                    break;
-                case 6:
-                    icon = getActivity().getString(R.string.weather_day_snowy);
-                    break;
-                case 5:
-                    icon = getActivity().getString(R.string.weather_day_rainy);
-                    break;
+            } else {
+                switch (id) {
+                    case 2:
+                        icon = getActivity().getString(R.string.weather_day_thunder);
+                        break;
+                    case 3:
+                        icon = getActivity().getString(R.string.weather_day_drizzle);
+                        break;
+                    case 7:
+                        icon = getActivity().getString(R.string.weather_day_foggy);
+                        break;
+                    case 8:
+                        icon = getActivity().getString(R.string.weather_day_cloudy);
+                        break;
+                    case 6:
+                        icon = getActivity().getString(R.string.weather_day_snowy);
+                        break;
+                    case 5:
+                        icon = getActivity().getString(R.string.weather_day_rainy);
+                        break;
+                }
             }
         } else {
+            //Toast.makeText(getActivity(), sunriseTime + "\n" + timeNow + "\n" + sunsetTime+ "\n" + "NIGHT", Toast.LENGTH_LONG).show();
             if (actualId == 800) {
                 icon = getActivity().getString(R.string.weather_night_clear);
             } else {
@@ -465,10 +527,6 @@ public class OverviewFragment extends android.support.v4.app.Fragment implements
             }
         }
         return icon;
-    }
-
-    public void changeCity(String city) {
-        updateWeatherData(city);
     }
 
     // region getSpanCount
@@ -500,7 +558,6 @@ public class OverviewFragment extends android.support.v4.app.Fragment implements
                 e.printStackTrace();
             }
             changeCity(cityName);
-            new CityPreference(getActivity()).setCity(cityName);
         }
 
         @Override

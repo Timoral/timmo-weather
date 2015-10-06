@@ -2,7 +2,7 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Grey -->
-    <color name="grey_50">#FAFAFA</color>
+    <color name="grey_50" tools:ignore="UnusedResources">#FAFAFA</color>
     <color name="grey_100" tools:ignore="UnusedResources">#F5F5F5</color>
     <color name="grey_200" tools:ignore="UnusedResources">#EEEEEE</color>
     <color name="grey_300" tools:ignore="UnusedResources">#E0E0E0</color>

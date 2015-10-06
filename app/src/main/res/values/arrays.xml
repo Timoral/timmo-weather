@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <array name="navigation_array">
-        <item>Overview</item>
-        <item>16 Day Forecast</item>
-    </array>
-</resources>

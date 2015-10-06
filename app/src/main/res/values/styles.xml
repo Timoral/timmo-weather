@@ -5,6 +5,8 @@
     <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar" tools:ignore="NewApi">
         <item name="colorPrimary">@color/grey_900</item>
         <item name="colorAccent">@color/grey_500</item>
+        <item name="android:colorPrimary">@color/grey_900</item>
+        <item name="android:colorAccent">@color/grey_500</item>
         <item name="android:buttonStyle">@style/buttonStyle</item>
         <item name="cardStyle">@style/CardView.Light</item>
         <item name="popupTheme">@style/Theme.AppCompat.Light</item>
@@ -64,7 +66,6 @@
 
     <style name="buttonStyle" parent="AppTheme">
         <item name="android:textColor">@color/grey_500</item>
-        <item name="android:textAppearance">?android:attr/borderlessButtonStyle</item>
     </style>
 
     <style name="SettingsTheme" parent="Theme.AppCompat.Light" tools:ignore="NewApi">

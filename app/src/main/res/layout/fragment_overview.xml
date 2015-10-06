@@ -34,15 +34,6 @@
                     android:text="@string/name_city" />
 
                 <ImageButton
-                    android:id="@+id/imageButtonChangeCity"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="10dp"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:contentDescription="@string/change_city"
-                    android:src="@drawable/ic_action_city" />
-
-                <ImageButton
                     android:id="@+id/imageButtonRefresh"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -59,6 +50,16 @@
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:contentDescription="@string/desc_location"
                     android:src="@drawable/ic_action_location" />
+
+                <ImageButton
+                    android:id="@+id/imageButtonChangeCity"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/change_city"
+                    android:src="@drawable/ic_action_city" />
+
             </LinearLayout>
 
             <TextView
@@ -118,7 +119,8 @@
                         <LinearLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:orientation="vertical">
+                            android:orientation="vertical"
+                            tools:ignore="UselessParent">
 
                             <TextView
                                 android:id="@+id/textViewCurrCondition"
