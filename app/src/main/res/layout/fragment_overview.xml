@@ -145,13 +145,6 @@
                                 android:text="@string/name_humidity" />
 
                             <TextView
-                                android:id="@+id/textViewCurrPressure"
-                                style="@style/textAppearanceMedium"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="@string/name_pressure" />
-
-                            <TextView
                                 android:id="@+id/textViewCurrWind"
                                 style="@style/textAppearanceMedium"
                                 android:layout_width="wrap_content"

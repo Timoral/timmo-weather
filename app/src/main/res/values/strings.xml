@@ -1,10 +1,14 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">Timmo Weather</string>
     <string name="title_overview">Overview</string>
+    <string name="title_detailed">Detailed View</string>
     <string name="title_forecast">16 Day Forecast</string>
+    <string name="title_moon">Current Moon Phase</string>
+
     <string name="action_settings">Settings</string>
     <string name="action_rate">Rate</string>
     <string name="action_more">More Apps</string>
+
     <string name="drawer_open">Open navigation drawer</string>
     <string name="drawer_close">Close navigation drawer</string>
 
@@ -17,6 +21,8 @@
     <string name="name_humidity">Humidity:</string>
     <string name="name_pressure">Pressure:</string>
     <string name="name_wind">Wind Speed:</string>
+    <string name="name_sunrise">Sunrise:</string>
+    <string name="name_sunset">Sunset:</string>
     <string name="name_hr">Hour</string>
     <string name="name_day">Day</string>
 
@@ -25,6 +31,7 @@
     <string name="desc_icon_weather" tools:ignore="UnusedResources">Weather Icon</string>
     <string name="desc_location">Location</string>
     <string name="desc_refresh">Refresh</string>
+    <string name="desc_moon">Moon Phase</string>
 
     <string name="change_city">Change city</string>
     <string name="go">GO</string>
@@ -52,5 +59,7 @@
     <string name="welcome_message">This appears to be the first time you have used Timmo Weather.\nPlease type your city into the text box below or use GPS to automatically find your location.</string>
     <string name="welcome_sub_message">Please note that GPS will work best in when the device is outside and in daylight.</string>
     <string name="welcome_notice">You can change city later by clicking on either the GPS or city icon shown below:</string>
+    <string name="northern_hemisphere">Northern Hemisphere</string>
+    <string name="southern_hemisphere">Southern Hemisphere</string>
 
 </resources>

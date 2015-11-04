@@ -53,11 +53,15 @@
 
     <string-array name="starting_page">
         <item>Overview (Default)</item>
+        <item>Detailed View</item>
         <item>16 Day Forecast</item>
+        <item>Moon Phase</item>
     </string-array>
     <string-array name="starting_page_values">
         <item>0</item>
         <item>1</item>
+        <item>2</item>
+        <item>3</item>
     </string-array>
 
     <!-- Overview Page settings -->

@@ -58,6 +58,12 @@ public class MainActivity extends AppCompatActivity {
             case "1":
                 selectDrawerItem(navigationViewDrawer.getMenu().getItem(1).setChecked(true));
                 break;
+            case "2":
+                selectDrawerItem(navigationViewDrawer.getMenu().getItem(2).setChecked(true));
+                break;
+            case "3":
+                selectDrawerItem(navigationViewDrawer.getMenu().getItem(3).setChecked(true));
+                break;
             default:
                 selectDrawerItem(navigationViewDrawer.getMenu().getItem(0).setChecked(true));
                 break;
@@ -144,7 +150,13 @@ public class MainActivity extends AppCompatActivity {
                 fragmentClass = OverviewFragment.class;
                 break;
             case R.id.nav_second_fragment:
+                fragmentClass = DetailedFragment.class;
+                break;
+            case R.id.nav_third_fragment:
                 fragmentClass = DailyForecastFragment.class;
+                break;
+            case R.id.nav_fourth_fragment:
+                fragmentClass = AstronomyFragment.class;
                 break;
             default:
                 fragmentClass = OverviewFragment.class;

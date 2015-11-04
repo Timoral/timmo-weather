@@ -53,7 +53,7 @@ public class OverviewFragment extends android.support.v4.app.Fragment implements
     private LocationManager locationManager;
     private LocationListener locationListener;
     private TextView textViewCurrCity, textViewUpdated, textViewCurrIcon, textViewCurrCondition,
-            textViewCurrTemp, textViewCurrHumidity, textViewCurrPressure, textViewCurrWind;
+            textViewCurrTemp, textViewCurrHumidity, textViewCurrWind;
     private ArrayList<String> arrayListHr, arrayListIcon, arrayListCondition, arrayListTemp, arrayListWind;
     private RecyclerView.Adapter recyclerViewAdapter;
     private SharedPreferences sharedPreferences;
@@ -93,7 +93,6 @@ public class OverviewFragment extends android.support.v4.app.Fragment implements
         textViewCurrCondition = (TextView) getActivity().findViewById(R.id.textViewCurrCondition);
         textViewCurrTemp = (TextView) getActivity().findViewById(R.id.textViewCurrTemp);
         textViewCurrHumidity = (TextView) getActivity().findViewById(R.id.textViewCurrHumidity);
-        textViewCurrPressure = (TextView) getActivity().findViewById(R.id.textViewCurrPressure);
         textViewCurrWind = (TextView) getActivity().findViewById(R.id.textViewCurrWind);
         ImageButton imageButtonChangeCity = (ImageButton) getActivity().findViewById(R.id.imageButtonChangeCity);
         ImageButton imageButtonRefresh = (ImageButton) getActivity().findViewById(R.id.imageButtonRefresh);
@@ -153,7 +152,7 @@ public class OverviewFragment extends android.support.v4.app.Fragment implements
 
 
         if (sharedPreferences.getBoolean("first_run", true)) {
-            FirstRunDialog();
+            firstRunDialog();
         }
     }
 
@@ -186,7 +185,7 @@ public class OverviewFragment extends android.support.v4.app.Fragment implements
         }
     }
 
-    private void FirstRunDialog() {
+    private void firstRunDialog() {
         goodCity = false;
 
         dialogFirstRun = new Dialog(getActivity());
@@ -242,8 +241,8 @@ public class OverviewFragment extends android.support.v4.app.Fragment implements
     }
 
     private void showInputDialog() {
-        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity());
-        alertDialogBuilder.setTitle("Change city");
+        AlertDialog.Builder dialogBuilderChangeCity = new AlertDialog.Builder(getActivity());
+        dialogBuilderChangeCity.setTitle("Change city");
 
         @SuppressLint("InflateParams") View view = getActivity().getLayoutInflater().inflate(R.layout.dialog_change_city, null);
 
@@ -261,8 +260,8 @@ public class OverviewFragment extends android.support.v4.app.Fragment implements
             }
         });
 
-        alertDialogBuilder.setView(view);
-        alertDialogBuilder.setPositiveButton("Go", new DialogInterface.OnClickListener() {
+        dialogBuilderChangeCity.setView(view);
+        dialogBuilderChangeCity.setPositiveButton("Go", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 if (checkboxGPS.isChecked()) {
@@ -280,13 +279,13 @@ public class OverviewFragment extends android.support.v4.app.Fragment implements
                 dialog.dismiss();
             }
         });
-        alertDialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+        dialogBuilderChangeCity.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
             }
         });
-        alertDialogBuilder.show();
+        dialogBuilderChangeCity.show();
     }
 
     private void changeCity(String city) {
@@ -310,7 +309,7 @@ public class OverviewFragment extends android.support.v4.app.Fragment implements
                                     Toast.LENGTH_LONG).show();
                             goodCity = false;
                             swipeRefreshLayout.setRefreshing(false);
-                            dialogFirstRun.show();
+                            showInputDialog();
                         }
                     });
                 } else {
@@ -359,9 +358,9 @@ public class OverviewFragment extends android.support.v4.app.Fragment implements
             }
             textViewCurrTemp.setText(tempCurr);
             String humidity = getResources().getString(R.string.name_humidity) + " " + mainCurr.getString("humidity") + "%";
-            String pressure = getResources().getString(R.string.name_pressure) + " " + mainCurr.getString("pressure") + "hPa";
+            //String pressure = getResources().getString(R.string.name_pressure) + " " + mainCurr.getString("pressure") + "hPa";
             textViewCurrHumidity.setText(humidity);
-            textViewCurrPressure.setText(pressure);
+            //textViewCurrPressure.setText(pressure);
             String windSpeedCurr;
             switch (sharedPreferences.getString("wind_speed", "0")) {
                 case "0":
@@ -557,6 +556,7 @@ public class OverviewFragment extends android.support.v4.app.Fragment implements
             } catch (IOException e) {
                 e.printStackTrace();
             }
+            goodCity = true;
             changeCity(cityName);
         }
 
@@ -572,5 +572,4 @@ public class OverviewFragment extends android.support.v4.app.Fragment implements
         public void onStatusChanged(String provider, int status, Bundle extras) {
         }
     }
-
 }
